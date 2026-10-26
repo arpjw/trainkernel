@@ -49,6 +49,7 @@ def main(argv=None):
     p.add_argument("--gemm-k-tile", type=int, choices=(16, 32), default=32)
     p.add_argument("--gemm-tile-n", type=int, choices=(32, 64), default=32)
     p.add_argument("--shared-skew", type=int, choices=(0, 16), default=0)
+    p.add_argument("--hopper-wgmma", action="store_true")
     p.add_argument("--cuda-path", type=Path)
     p.add_argument("--json", type=Path)
     p.add_argument("--seed", type=int, default=20261025)
@@ -65,7 +66,8 @@ def main(argv=None):
         batch = batches[0]
         from trainkernel import compile as mk_compile
         options = {"max_blocks": args.maxblocks, "blocks_per_sm": args.blocks_per_sm, "threads_per_block": args.threads_per_block,
-                   "split_k_gemv": args.split_k_gemv, "gemm_k_tile": args.gemm_k_tile, "gemm_tile_n": args.gemm_tile_n, "shared_skew": args.shared_skew}
+                   "split_k_gemv": args.split_k_gemv, "gemm_k_tile": args.gemm_k_tile, "gemm_tile_n": args.gemm_tile_n, "shared_skew": args.shared_skew,
+                   "hopper_wgmma": args.hopper_wgmma}
         t0 = time.perf_counter(); mega = mk_compile(lambda q, x, y: step_master(q, x, y, 1e-3), (initial, *batch), inplace_outputs={5: 0, 6: 1, 7: 2, 8: 3}, **options); compile_s = time.perf_counter() - t0
         state = tuple(x.clone() for x in initial)
         out, mega_events = _profile(mega, state, batch, args.warmup)

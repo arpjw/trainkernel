@@ -51,6 +51,8 @@ CONFIGS = {
         {"max_blocks": 132, "threads_per_block": 128, "gemm_tile_n": 64},
         {"max_blocks": 264, "blocks_per_sm": 2, "threads_per_block": 128, "shared_skew": 16},
         {"max_blocks": 264, "blocks_per_sm": 2, "threads_per_block": 128, "gemm_tile_n": 64},
+        {"max_blocks": 132, "threads_per_block": 128, "hopper_wgmma": True},
+        {"max_blocks": 264, "blocks_per_sm": 2, "threads_per_block": 128, "hopper_wgmma": True},
     ],
     "medium": [
         {"max_blocks": 216, "blocks_per_sm": 2, "threads_per_block": 128, "shared_skew": 16},
@@ -60,6 +62,8 @@ CONFIGS = {
         {"max_blocks": 132, "threads_per_block": 128, "gemm_tile_n": 64},
         {"max_blocks": 264, "blocks_per_sm": 2, "threads_per_block": 128, "shared_skew": 16},
         {"max_blocks": 264, "blocks_per_sm": 2, "threads_per_block": 128, "gemm_tile_n": 64},
+        {"max_blocks": 132, "threads_per_block": 128, "hopper_wgmma": True},
+        {"max_blocks": 264, "blocks_per_sm": 2, "threads_per_block": 128, "hopper_wgmma": True},
     ],
 }
 

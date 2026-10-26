@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import os
 from typing import Any
 
 import torch
@@ -101,7 +102,7 @@ class CompiledProgram:
         return self.run_into(*inputs, buffers=self.allocate(*inputs))
 
 
-def compile_program(program: Program, example_inputs: tuple[Any, ...] | list[Any], *, blocks_per_sm: int = 1, max_blocks: int | None = None, fuse_pointwise: bool = True, fuse_epilogues: bool = True, gemm_k_tile: int = 32, gemm_tile_n: int = 32, shared_skew: int = 0, split_k_gemv: bool = False, threads_per_block: int = 128, inline_input_casts: bool = True, inplace_outputs: dict[int, int] | None = None, verbose: bool = False) -> CompiledProgram:
+def compile_program(program: Program, example_inputs: tuple[Any, ...] | list[Any], *, blocks_per_sm: int = 1, max_blocks: int | None = None, fuse_pointwise: bool = True, fuse_epilogues: bool = True, gemm_k_tile: int = 32, gemm_tile_n: int = 32, shared_skew: int = 0, split_k_gemv: bool = False, threads_per_block: int = 128, inline_input_casts: bool = True, hopper_wgmma: bool = False, inplace_outputs: dict[int, int] | None = None, verbose: bool = False) -> CompiledProgram:
     """Compile for the current input device, requiring Linux, CUDA and SM80+."""
     flat, _ = tree_flatten(example_inputs)
     if not flat or any(not isinstance(x, torch.Tensor) for x in flat):
@@ -116,27 +117,45 @@ def compile_program(program: Program, example_inputs: tuple[Any, ...] | list[Any
     capability = torch.cuda.get_device_capability(device)
     if capability < (8, 0):
         raise RuntimeError("trainkernel: NVIDIA compute capability 8.0 or newer required")
-    generated = generate(program, blocks_per_sm=blocks_per_sm, max_blocks=max_blocks, fuse_pointwise=fuse_pointwise, fuse_epilogues=fuse_epilogues, gemm_k_tile=gemm_k_tile, gemm_tile_n=gemm_tile_n, shared_skew=shared_skew, split_k_gemv=split_k_gemv, threads_per_block=threads_per_block, inline_input_casts=inline_input_casts, inplace_outputs=inplace_outputs)
+    if type(hopper_wgmma) is not bool:
+        raise ValueError("trainkernel: hopper_wgmma must be a boolean")
+    if hopper_wgmma and capability != (9, 0):
+        raise RuntimeError("trainkernel: hopper_wgmma requires an SM90a Hopper GPU")
+    generated = generate(program, blocks_per_sm=blocks_per_sm, max_blocks=max_blocks, fuse_pointwise=fuse_pointwise, fuse_epilogues=fuse_epilogues, gemm_k_tile=gemm_k_tile, gemm_tile_n=gemm_tile_n, shared_skew=shared_skew, split_k_gemv=split_k_gemv, threads_per_block=threads_per_block, inline_input_casts=inline_input_casts, hopper_wgmma=hopper_wgmma, inplace_outputs=inplace_outputs)
     if any(flat[i].requires_grad for i in (inplace_outputs or {}).values()):
         raise ValueError("trainkernel: inplace targets must be detached from autograd")
     from torch.utils.cpp_extension import CUDA_HOME, load_inline
     if CUDA_HOME is None:
         raise RuntimeError("trainkernel: CUDA toolkit with nvcc is required to compile generated kernels")
-    name = "trainkernel_" + hashlib.sha256((generated.source + str(capability) + torch.__version__).encode()).hexdigest()[:20]
     # Restrict compilation to the actual target rather than relying on a global
     # TORCH_CUDA_ARCH_LIST, which may target a different GPU or unsupported SM.
-    arch = f"-gencode=arch=compute_{capability[0]}{capability[1]},code=sm_{capability[0]}{capability[1]}"
-    with torch.cuda.device(device):
-        module = load_inline(
-            name=name,
-            cpp_sources="void launch(std::vector<torch::Tensor>, std::vector<torch::Tensor>, torch::Tensor); std::vector<int64_t> resource_usage();",
-            cuda_sources=generated.source,
-            functions=["launch", "resource_usage"],
-            extra_cuda_cflags=["-O3", "-std=c++17", "--fmad=false", arch],
-            extra_cflags=["-O3"],
-            with_cuda=True,
-            verbose=verbose,
-        )
+    target = "90a" if hopper_wgmma else f"{capability[0]}{capability[1]}"
+    cache_identity = (generated.source, capability, target, hopper_wgmma, torch.__version__)
+    name = "trainkernel_" + hashlib.sha256(repr(cache_identity).encode()).hexdigest()[:20]
+    arch = f"-gencode=arch=compute_{target},code=sm_{target}"
+    previous_arch_list = os.environ.get("TORCH_CUDA_ARCH_LIST")
+    if hopper_wgmma:
+        # PyTorch otherwise adds a generic sm_90 pass which cannot assemble
+        # architecture-conditional WGMMA instructions.
+        os.environ["TORCH_CUDA_ARCH_LIST"] = "9.0a"
+    try:
+        with torch.cuda.device(device):
+            module = load_inline(
+                name=name,
+                cpp_sources="void launch(std::vector<torch::Tensor>, std::vector<torch::Tensor>, torch::Tensor); std::vector<int64_t> resource_usage();",
+                cuda_sources=generated.source,
+                functions=["launch", "resource_usage"],
+                extra_cuda_cflags=["-O3", "-std=c++17", "--fmad=false", arch],
+                extra_cflags=["-O3"],
+                with_cuda=True,
+                verbose=verbose,
+            )
+    finally:
+        if hopper_wgmma:
+            if previous_arch_list is None:
+                os.environ.pop("TORCH_CUDA_ARCH_LIST", None)
+            else:
+                os.environ["TORCH_CUDA_ARCH_LIST"] = previous_arch_list
     result = CompiledProgram(program, generated, module, device, inplace_outputs)
     result._validate_inputs(tuple(flat))
     return result
