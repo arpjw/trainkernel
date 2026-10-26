@@ -40,6 +40,8 @@ class CompiledProgram:
         for i, (tensor, spec) in enumerate(zip(inputs, self.program.inputs)):
             if not isinstance(tensor, torch.Tensor):
                 raise TypeError(f"megakernel: input {i} must be a tensor")
+            if tensor.is_neg() or tensor.is_conj():
+                raise ValueError("megakernel: resolve lazy negative or conjugate input views before execution")
             if tensor.device != self.device or tuple(tensor.shape) != spec.shape or tuple(tensor.stride()) != spec.strides or tensor.dtype != getattr(torch, spec.dtype):
                 raise ValueError(f"megakernel: input {i} does not match compiled device, shape, stride, or dtype")
 

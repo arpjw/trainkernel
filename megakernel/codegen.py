@@ -51,6 +51,7 @@ class GeneratedKernel:
     blocks_per_sm: int
     max_work_blocks: int
     grid_barriers: int
+    direct_outputs: int
 
 
 class _Generator:
@@ -69,6 +70,11 @@ class _Generator:
             if fuse_pointwise and op.op in _POINTWISE
             and counts[op.output.buffer] == 1 and op.output.buffer not in output_buffers
         }
+        self.output_bindings: dict[str, tuple[int, str]] = {}
+        for index, spec in enumerate(program.outputs):
+            producer = self.producers.get(spec.buffer)
+            if producer is not None and producer.output.dtype == spec.dtype and spec.offset == 0 and numel(spec.shape) == numel(producer.output.shape) and all(dim == 1 or a == b for dim, a, b in zip(spec.shape, spec.strides, contiguous_strides(spec.shape))):
+                self.output_bindings.setdefault(spec.buffer, (index, spec.dtype))
         self.materialized = [op for op in program.operations if op.output.buffer not in self.inline]
         self.offsets, self.workspace_elements = self._plan_workspace()
         self.tensor_core_count = 0
@@ -130,7 +136,18 @@ class _Generator:
             if spec.dtype == "float16":
                 return f"__half2float({raw})"
             return raw
+        if spec.buffer in self.output_bindings:
+            slot, dtype = self.output_bindings[spec.buffer]
+            raw = f"static_cast<const {_DTYPES[dtype]}*>(args.outputs[{slot}])[{index}]"
+            return f"__bfloat162float({raw})" if dtype == "bfloat16" else f"__half2float({raw})" if dtype == "float16" else raw
         return f"workspace[{self.offsets[spec.buffer]}LL + ({index})]"
+
+    def store(self, spec: TensorSpec, index: str, value: str) -> str:
+        if spec.buffer in self.output_bindings:
+            slot, dtype = self.output_bindings[spec.buffer]
+            cast = f"__float2bfloat16_rn({value})" if dtype == "bfloat16" else f"__float2half_rn({value})" if dtype == "float16" else value
+            return f"static_cast<{_DTYPES[dtype]}*>(args.outputs[{slot}])[{index}] = {cast};"
+        return f"workspace[{self.offsets[spec.buffer]}LL + ({index})] = {_round(value, spec.dtype)};"
 
     def operand(self, operand: TensorSpec | int | float, output: TensorSpec, index: str) -> str:
         if not isinstance(operand, TensorSpec):
@@ -169,9 +186,9 @@ class _Generator:
         raise ValueError(f"megakernel: unsupported pointwise operation {op.op}")
 
     def emit_pointwise(self, op: Operation) -> str:
-        expr = _round(self.point_expr(op, "i"), op.output.dtype)
+        expr = self.point_expr(op, "i")
         return f"""for (int64_t i = tid; i < {numel(op.output.shape)}LL; i += nt) {{
-            workspace[{self.offsets[op.output.buffer]}LL + i] = {expr};
+            {self.store(op.output, 'i', expr)}
         }}"""
 
     def emit_reduction(self, op: Operation) -> str:
@@ -197,7 +214,7 @@ class _Generator:
             return f"""for (int64_t row = tid; row < {numel(op.output.shape)}LL; row += nt) {{
                 float acc = 0.0f;
                 for (int64_t r = 0; r < {size}LL; ++r) acc += {value};
-                workspace[{self.offsets[op.output.buffer]}LL + row] = {_round(finish, op.output.dtype)};
+                {self.store(op.output, 'row', finish)}
             }}"""
         finish = "shared_reduce[0]" if op.op == "sum" else f"(shared_reduce[0] / {size}.0f)" if size else "NAN"
         return f"""for (int64_t row = blockIdx.x; row < {numel(op.output.shape)}LL; row += gridDim.x) {{
@@ -209,7 +226,7 @@ class _Generator:
                 if (threadIdx.x < s) shared_reduce[threadIdx.x] += shared_reduce[threadIdx.x + s];
                 __syncthreads();
             }}
-            if (threadIdx.x == 0) workspace[{self.offsets[op.output.buffer]}LL + row] = {_round(finish, op.output.dtype)};
+            if (threadIdx.x == 0) {self.store(op.output, 'row', finish)}
             __syncthreads();
         }}"""
 
@@ -270,7 +287,7 @@ class _Generator:
                 __syncthreads();
                 for (int p = threadIdx.x; p < {tile_size * tile_size}; p += blockDim.x) {{
                     int64_t rr = row + p / {tile_size}, cc = col + p % {tile_size};
-                    if (rr < {m}LL && cc < {n}LL) workspace[{self.offsets[op.output.buffer]}LL + rr * {n}LL + cc] = {_round(epilogue('shared_c[p]', f'rr * {n}LL + cc'), op.output.dtype)};
+                    if (rr < {m}LL && cc < {n}LL) {self.store(op.output, f'rr * {n}LL + cc', epilogue('shared_c[p]', f'rr * {n}LL + cc'))}
                 }}
                 __syncthreads();
             }}
@@ -296,7 +313,7 @@ class _Generator:
                 for (int j = 0; j < 16; ++j) acc = fmaf(shared_float_a[rr * 16 + j], shared_float_b[j * 8 + cc], acc);
                 __syncthreads();
             }}
-            if (row + rr < {m}LL && col + cc < {n}LL) workspace[{self.offsets[op.output.buffer]}LL + (row + rr) * {n}LL + col + cc] = {_round(epilogue('acc', f'(row + rr) * {n}LL + col + cc'), op.output.dtype)};
+            if (row + rr < {m}LL && col + cc < {n}LL) {self.store(op.output, f'(row + rr) * {n}LL + col + cc', epilogue('acc', f'(row + rr) * {n}LL + col + cc'))}
             __syncthreads();
         }}"""
 
@@ -355,6 +372,8 @@ class _Generator:
             statements.append("mk_grid_sync(grid);")
             barriers += 1
         for i, spec in enumerate(self.program.outputs):
+            if spec.buffer in self.output_bindings and self.output_bindings[spec.buffer][0] == i:
+                continue
             value = self.read(spec, self.coords(spec.shape, "i"))
             stored = f"__float2bfloat16_rn({value})" if spec.dtype == "bfloat16" else f"__float2half_rn({value})" if spec.dtype == "float16" else value
             statements.append(f"for (int64_t i = tid; i < {numel(spec.shape)}LL; i += nt) static_cast<{_DTYPES[spec.dtype]}*>(args.outputs[{i}])[i] = {stored};")
@@ -376,7 +395,7 @@ class _Generator:
         max_work_blocks = max(work_blocks)
         source = _CUDA_PREAMBLE.replace("@INPUT_COUNT@", str(max(1, len(self.program.inputs)))).replace("@OUTPUT_COUNT@", str(max(1, len(self.program.outputs))))
         source += "\n".join(statements) + "\n}\n" + _CUDA_HOST.replace("@INPUT_COUNT@", str(len(self.program.inputs))).replace("@OUTPUT_COUNT@", str(len(self.program.outputs))).replace("@BLOCKS_PER_SM@", str(self.blocks_per_sm)).replace("@MAX_WORK_BLOCKS@", str(max_work_blocks))
-        return GeneratedKernel(source, self.workspace_elements, len(self.materialized), len(self.inline), self.tensor_core_count, self.blocks_per_sm, max_work_blocks, barriers)
+        return GeneratedKernel(source, self.workspace_elements, len(self.materialized), len(self.inline), self.tensor_core_count, self.blocks_per_sm, max_work_blocks, barriers, len(self.output_bindings))
 
 
 def generate(program: Program, *, blocks_per_sm: int = 1, fuse_pointwise: bool = True) -> GeneratedKernel:

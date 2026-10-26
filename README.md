@@ -36,7 +36,7 @@ compiled = megakernel.compile(train_step, (weights, x, target))
 loss, gradients, weights = compiled(weights, x, target)
 ```
 
-`examples/train.py` uses `torch.nn.Linear` modules through `torch.func.functional_call`. Parameters may be nested dictionaries or tuples. Updated parameters are returned explicitly; inputs are not mutated. Returned tensors are independent contiguous materializations, so output alias identity and original view strides are not preserved. The result does not register a new autograd function. Different shapes, strides, devices, or dtypes require another compilation.
+`examples/train.py` uses `torch.nn.Linear` modules through `torch.func.functional_call`. Parameters may be nested dictionaries or tuples. Inputs and operations must stay on one device; resolve lazy negative or conjugate input views before compiling. Updated parameters are returned explicitly; inputs are not mutated. Returned tensors are independent contiguous materializations, so output alias identity and original view strides are not preserved. The result does not register a new autograd function. Different shapes, strides, devices, or dtypes require another compilation.
 
 Inspect the compiler without a GPU:
 

@@ -68,6 +68,10 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
         raise ValueError("megakernel: unsupported dtype; expected float32, float16, or bfloat16")
     if any(x.layout != torch.strided for x in flat_inputs):
         raise ValueError("megakernel: only strided tensors are supported")
+    if any(x.device != flat_inputs[0].device for x in flat_inputs):
+        raise ValueError("megakernel: inputs must use one device")
+    if any(x.is_neg() or x.is_conj() for x in flat_inputs):
+        raise ValueError("megakernel: resolve lazy negative or conjugate input views before capture")
     from torch.func import functionalize
     from torch.fx.experimental.proxy_tensor import make_fx
 
@@ -105,6 +109,8 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
         if target.startswith("aten.copy_"):
             raise ValueError("megakernel: input mutation is unsupported; return updated tensors instead")
         shape, dtype = _metadata(node)
+        if node.meta["val"].device != flat_inputs[0].device:
+            raise ValueError("megakernel: cross-device operations are unsupported")
         tensor_args = [specs[arg] for arg in node.args if isinstance(arg, torch.fx.Node)]
         if target in _VIEWS:
             specs[node] = _view(node, tensor_args[0], shape, dtype)

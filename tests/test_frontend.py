@@ -20,3 +20,15 @@ def test_capture_rejects_non_tensor_inputs():
         assert "tensors only" in str(e)
     else:
         raise AssertionError("expected TypeError")
+
+
+def test_capture_rejects_cross_device_copy():
+    import pytest
+    with pytest.raises(ValueError, match="cross-device"):
+        capture(lambda x: x.to("meta"), (torch.ones(3),))
+
+
+def test_capture_rejects_lazy_negative_input():
+    import pytest
+    with pytest.raises(ValueError, match="lazy negative"):
+        capture(lambda x: x + 1, (torch._neg_view(torch.ones(3)),))

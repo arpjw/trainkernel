@@ -129,7 +129,7 @@ def main(argv=None):
             generated = mega.runner.generated
             result["kernel"] = {"launches_per_step": 1, "materialized_operations": generated.materialized_operations,
                                 "inlined_operations": generated.inlined_operations, "tensor_core_operations": generated.tensor_core_operations,
-                                "workspace_bytes": generated.workspace_elements * 4, "blocks_per_sm_limit": generated.blocks_per_sm, "max_work_blocks": generated.max_work_blocks, "grid_barriers": generated.grid_barriers}
+                                "workspace_bytes": generated.workspace_elements * 4, "blocks_per_sm_limit": generated.blocks_per_sm, "max_work_blocks": generated.max_work_blocks, "grid_barriers": generated.grid_barriers, "direct_outputs": generated.direct_outputs}
             if args.dump_cuda:
                 args.dump_cuda.parent.mkdir(parents=True, exist_ok=True)
                 args.dump_cuda.write_text(mega.source)
