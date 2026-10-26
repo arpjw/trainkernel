@@ -11,6 +11,9 @@ python -m pytest -q
 python -m build
 ```
 
+Release changes must update `CHANGELOG.md` and `RELEASE_NOTES.md` before the
+version tag is created.
+
 CUDA changes should include a focused A100 parity check when an A100 is
 available. Benchmark claims must include the workload, seed policy, precision,
 baseline configuration, timing protocol, and limitations. Do not commit API

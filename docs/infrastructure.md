@@ -23,3 +23,19 @@ Direct SSH checks passed on the pod: `nvidia-smi` reported the A100, `nvcc --ver
 - The [optimization report](../results/a100-optimization/README.md) retains the twelve-run held-out matrix, 113-test A100 log, sanitizer results, generated CUDA, profiler record, and environment details. Results were copied to the repository workspace before teardown.
 - Clock locking and hardware counters were denied by the pod's permissions, as recorded in the [clock attempt](../results/a100-optimization/evidence/clock-policy.json) and [counter attempt](../results/a100-optimization/evidence/ncu-tiny.csv). Timings therefore used unlocked clocks.
 - After evidence was saved, only this project-created pod was terminated. Runpod returned a successful deletion response and a follow-up read confirmed it was absent. The dedicated temporary SSH key was removed locally.
+
+## Independent release-validation pod (2026-10-26)
+
+- A fresh Secure Cloud pod ran one A100 SXM4 80 GB in US-WA-1 at the quoted
+  `$1.79/hour` rate. This was a different host and data center from the
+  optimization run.
+- It used the same official PyTorch 2.8 image, a 50 GB ephemeral disk, and no
+  network or persistent volume. Source was transferred without GitHub
+  credentials and validated at git revision `2ab10aac1e91bb69d6b86d3d76d3ada4d57a115f`.
+- The [release record](../results/release-validation/README.md) contains the
+  116-test GPU pass, 100-update example, three-seed classification-head result,
+  package checks, environment, and raw benchmark data.
+- After the evidence was copied, the pod was terminated. A fresh provider read
+  returned `404 Not Found`. The temporary project SSH key was removed from the
+  account, and a read-back confirmed that the two pre-existing keys were
+  unchanged.

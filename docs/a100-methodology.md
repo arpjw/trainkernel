@@ -57,10 +57,18 @@ exists. This is a single-run accounting estimate, not a deployment cost model.
 
 ## Limits
 
-Evidence comes from one A100 80 GB pod with unlocked clocks. No hardware
-performance counters were collected, so the measurements do not establish
+The optimization matrix comes from one A100 80 GB pod with unlocked clocks;
+the independent release validation comes from a second A100 80 GB pod. No
+hardware performance counters were collected, so the measurements do not establish
 occupancy, instruction throughput, memory bandwidth, or energy efficiency.
 They also do not establish H100 behavior, long-run convergence, data-loader
 throughput, distributed scaling, or optimizer coverage beyond the explicit SGD
 step. All shapes and seeds are retained, including regressions and baseline
 accuracy failures.
+
+The independent release-candidate run adds a B4/I32/H64/O16 classification
+head using one-hot teacher labels and mean squared error. It uses the same
+three held-out seeds and comparison protocol. This is a useful online head,
+but it is not cross-entropy training or an end-to-end application benchmark.
+Its release report presents the cold-cache compilation and capture cost
+separately from the two warm-cache runs.

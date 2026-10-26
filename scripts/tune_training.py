@@ -31,7 +31,7 @@ def main():
     params=tuple(v.float() for v in params)
     fn=lambda pp,x,y:step_master(pp,x,y,1e-3)
     root=Path(__file__).resolve().parents[1]
-    sources={str(f.relative_to(root)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted((root/'megakernel').glob('*.py'))}
+    sources={str(f.relative_to(root)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted((root/'trainkernel').glob('*.py'))}
     result={'purpose':'exploratory tuning, not held-out evidence','case':a.case,'shape':CASES[a.case],'seed':20261025,'source_sha256':sources,'trials':[]}
     configs=CONFIGS[a.case]
     if a.only is not None and not 0 <= a.only < len(configs):

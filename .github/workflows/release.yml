@@ -31,4 +31,4 @@ jobs:
           gh release create "$GITHUB_REF_NAME" dist/*
           --verify-tag
           --title "TrainKernel $GITHUB_REF_NAME"
-          --generate-notes
+          --notes-file RELEASE_NOTES.md

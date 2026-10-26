@@ -19,8 +19,17 @@ speedups.
 | medium MLP | 255.32 μs | 42.19 μs | 6.052, slower |
 
 These are complete forward, backward, and update steps captured as CUDA Graphs.
-The [held-out report](results/a100-optimization/README.md) publishes all seeds,
+The [held-out report](https://github.com/arpjw/trainkernel/blob/main/results/a100-optimization/README.md) publishes all seeds,
 raw timings, correctness checks, baseline failures, and the two regressions.
+
+An independent release run adds a one-hot least-squares classification head.
+Across three seeds, TrainKernel's in-place path measured 13.07 us versus
+18.63 us for the fastest measured Inductor configuration at the median, or
+1.43x faster. The [release evidence](https://github.com/arpjw/trainkernel/blob/main/results/release-validation/README.md)
+retains all raw samples and correctness failures. Its cold-cache setup took
+53.62 seconds and required an estimated 7.82 million updates to amortize, so
+this is a steady-state small-workload result rather than a claim about
+short-lived jobs.
 
 ## Install
 
@@ -64,7 +73,7 @@ state trees. The supplied state must be detached from autograd because the
 training function computes its own gradients. `compiled.capture(...)` creates a
 CUDA Graph after warmup, restores the supplied state after warmup and capture,
 and returns a reusable `CapturedProgram`; replay outputs borrow captured buffers
-with fixed shapes and addresses. See the [100-update example](examples/online_training.py).
+with fixed shapes and addresses. See the [100-update example](https://github.com/arpjw/trainkernel/blob/main/examples/online_training.py).
 
 Parameters may be nested dictionaries or tuples. Inputs and operations must stay on one device; resolve lazy negative or conjugate input views before compiling. Updated parameters are returned explicitly. The compiler proves direct last-read state commits where safe and stages all other updates transactionally; input mutation and arbitrary aliasing remain unsupported. Different shapes, strides, devices, or dtypes require another compilation.
 
@@ -89,7 +98,7 @@ workload and package build:
 bash scripts/run_release_validation.sh results/release-validation
 ```
 
-The [training-loop harness](benchmarks/train_loop.py) uses FP32 master weights, BF16 compute, FP32 loss, and FP32 SGD updates. It checks every loss, gradient, and updated parameter for 100 steps and separately checks a captured 20-step replay. Timed graphs include state feedback over four resident batches. They compare pure and in-place megakernels, captured eager PyTorch, and default and eager-rounding Inductor variants. CUDA event timings exclude compilation, capture, reset, and warmup, and retain raw samples. Numerical failures remain visible for all baselines. The [methodology](docs/a100-methodology.md) explains the held-out seeds and fixed tolerance policy; the [result](results/a100-optimization/README.md) includes both wins and regressions. The older [native-BF16 fixed-step harness](benchmarks/train_mlp.py) remains available for the historical report.
+The [training-loop harness](https://github.com/arpjw/trainkernel/blob/main/benchmarks/train_loop.py) uses FP32 master weights, BF16 compute, FP32 loss, and FP32 SGD updates. It checks every loss, gradient, and updated parameter for 100 steps and separately checks a captured 20-step replay. Timed graphs include state feedback over four resident batches. They compare pure and in-place megakernels, captured eager PyTorch, and default and eager-rounding Inductor variants. CUDA event timings exclude compilation, capture, reset, and warmup, and retain raw samples. Numerical failures remain visible for all baselines. The [methodology](https://github.com/arpjw/trainkernel/blob/main/docs/a100-methodology.md) explains the held-out seeds and fixed tolerance policy; the [result](https://github.com/arpjw/trainkernel/blob/main/results/a100-optimization/README.md) includes both wins and regressions. The older [native-BF16 fixed-step harness](https://github.com/arpjw/trainkernel/blob/main/benchmarks/train_mlp.py) remains available for the historical report.
 
 ## Supported subset
 
@@ -103,7 +112,7 @@ Temporary values use FP32 workspace storage with explicit rounding at low-precis
 
 ## Design and evidence
 
-See [compiler design](docs/design.md), [A100 evidence](results/a100-optimization/README.md), and [GPU access record](docs/infrastructure.md). CPU tests validate IR semantics, views, reductions, diagnostics, and arena lifetimes. The complete A100 suite passed 113 tests that compile and execute generated CUDA, compare training outputs across precisions, and exercise CUDA Graph replay.
+See [compiler design](https://github.com/arpjw/trainkernel/blob/main/docs/design.md), [A100 optimization evidence](https://github.com/arpjw/trainkernel/blob/main/results/a100-optimization/README.md), [independent release validation](https://github.com/arpjw/trainkernel/blob/main/results/release-validation/README.md), and [GPU access record](https://github.com/arpjw/trainkernel/blob/main/docs/infrastructure.md). CPU tests validate IR semantics, views, reductions, diagnostics, and arena lifetimes. The independent release suite passed 116 tests that compile and execute generated CUDA, compare training outputs across precisions, and exercise CUDA Graph replay.
 
 ## Related work and roadmap
 
@@ -124,4 +133,4 @@ are roadmap items, not v0.1 capabilities.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Apache License 2.0. See [LICENSE](https://github.com/arpjw/trainkernel/blob/main/LICENSE) and [NOTICE](https://github.com/arpjw/trainkernel/blob/main/NOTICE).
