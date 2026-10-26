@@ -1,0 +1,146 @@
+{
+  "shape": [
+    128,
+    512,
+    1024,
+    256
+  ],
+  "options": {
+    "max_blocks": 264,
+    "threads_per_block": 128,
+    "blocks_per_sm": 2,
+    "gemm_k_tile": 32,
+    "gemm_tile_n": 32,
+    "shared_skew": 16,
+    "split_k_gemv": false,
+    "hopper_wgmma": false,
+    "inplace_outputs": {
+      "5": 0,
+      "6": 1,
+      "7": 2,
+      "8": 3
+    }
+  },
+  "instrumented": true,
+  "resources": {
+    "registers_per_thread": 40,
+    "local_bytes_per_thread": 0,
+    "shared_bytes_per_block": 11776,
+    "resident_blocks_per_sm": 12
+  },
+  "stages": [
+    {
+      "operations": [
+        [
+          "mm_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 46.400000000000006
+    },
+    {
+      "operations": [
+        [
+          "mm_1",
+          "mm"
+        ]
+      ],
+      "median_us": 91.808
+    },
+    {
+      "operations": [
+        [
+          "sub",
+          "sub"
+        ]
+      ],
+      "median_us": 1.632
+    },
+    {
+      "operations": [
+        [
+          "mean",
+          "mean"
+        ]
+      ],
+      "median_us": 1.8559999999999999
+    },
+    {
+      "operations": [],
+      "median_us": 1.472
+    },
+    {
+      "operations": [
+        [
+          "_to_copy_6",
+          "cast"
+        ]
+      ],
+      "median_us": 1.664
+    },
+    {
+      "operations": [
+        [
+          "sum_1",
+          "sum"
+        ],
+        [
+          "mm_2",
+          "mm"
+        ],
+        [
+          "mm_3_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 35.68000000000001
+    },
+    {
+      "operations": [
+        [
+          "sum_2",
+          "sum"
+        ],
+        [
+          "mm_4",
+          "mm"
+        ],
+        [
+          "_to_copy_7",
+          "cast"
+        ]
+      ],
+      "median_us": 21.168
+    },
+    {
+      "operations": [
+        [
+          "_to_copy_9",
+          "cast"
+        ],
+        [
+          "sub_1",
+          "sub"
+        ]
+      ],
+      "median_us": 4.8
+    },
+    {
+      "operations": [
+        [
+          "sub_2",
+          "sub"
+        ],
+        [
+          "sub_3",
+          "sub"
+        ],
+        [
+          "sub_4",
+          "sub"
+        ]
+      ],
+      "median_us": 3.376
+    }
+  ]
+}

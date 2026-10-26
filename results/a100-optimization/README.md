@@ -51,4 +51,4 @@ python -m examples.online_training
 bash scripts/run_train_loop_suite.sh results/a100-optimization/heldout
 ```
 
-The benchmark covers a small two-layer ReLU MLP with SGD, static shapes, resident synthetic batches, and explicit `torch.func.grad_and_value` differentiation. It does not include data loading, host-to-device transfers, distributed work, AdamW, attention, dropout, dynamic shapes, or arbitrary PyTorch autograd. H100 and Hopper-specific execution remain untested.
+The benchmark covers a small two-layer ReLU MLP with SGD, static shapes, resident synthetic batches, and explicit `torch.func.grad_and_value` differentiation. It does not include data loading, host-to-device transfers, distributed work, AdamW, attention, dropout, dynamic shapes, or arbitrary PyTorch autograd. This A100 run did not test H100 or Hopper-specific execution; those results are reported separately in the [H100 report](../h100-optimization/README.md).

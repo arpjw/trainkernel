@@ -1,0 +1,14 @@
+python: 3.12.3
+torch: 2.8.0+cu128
+torch_cuda: 12.8
+trainkernel: 0.1.0
+device: NVIDIA H100 80GB HBM3
+capability: (9, 0)
+device_count: 1
+git: 2a1188bc9a7cf36ce434f616d663e55e42c48274
+NVIDIA H100 80GB HBM3, 595.91.07, 81559 MiB
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Fri_Feb_21_20:23:50_PST_2025
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0

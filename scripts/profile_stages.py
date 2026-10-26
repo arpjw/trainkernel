@@ -27,6 +27,7 @@ def main():
     p.add_argument('--gemm-tile-n', type=int, default=32)
     p.add_argument('--shared-skew', type=int, default=0)
     p.add_argument('--split-k-gemv', action='store_true')
+    p.add_argument('--hopper-wgmma', action='store_true')
     p.add_argument('--training', action='store_true', help='FP32 masters and loss, BF16 compute, state commit')
     p.add_argument('--json', type=Path, required=True)
     a = p.parse_args()
@@ -63,7 +64,7 @@ def main():
         params, x, y = make_inputs(*shape, torch.bfloat16, 'cuda')
         fn = lambda pp, xx, yy: step(pp, xx, yy, 1e-3)
     initial = tuple(v.clone() for v in params)
-    kwargs = dict(max_blocks=a.max_blocks, threads_per_block=a.threads_per_block, blocks_per_sm=a.blocks_per_sm, gemm_k_tile=a.gemm_k_tile, gemm_tile_n=a.gemm_tile_n, shared_skew=a.shared_skew, split_k_gemv=a.split_k_gemv)
+    kwargs = dict(max_blocks=a.max_blocks, threads_per_block=a.threads_per_block, blocks_per_sm=a.blocks_per_sm, gemm_k_tile=a.gemm_k_tile, gemm_tile_n=a.gemm_tile_n, shared_skew=a.shared_skew, split_k_gemv=a.split_k_gemv, hopper_wgmma=a.hopper_wgmma)
     if a.training: kwargs['inplace_outputs'] = {5:0,6:1,7:2,8:3}
     mega = mk_compile(fn, (params, x, y), **kwargs)
     expected = fn(params,x,y)

@@ -1,0 +1,1 @@
+{'passed': True, 'tolerance': 0.01, 'timing_iterations': 5000, 'shape': [64, 16, 64], 'capability': [9, 0], 'variants': {'shared_source': {'passed': True, 'max_abs_error': 9.5367431640625e-07, 'mean_kernel_us': 4.079993438720703}, 'register_source': {'passed': True, 'max_abs_error': 9.5367431640625e-07, 'mean_kernel_us': 3.8403839111328124}}}

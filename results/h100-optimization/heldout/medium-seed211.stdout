@@ -1,0 +1,2178 @@
+W1026 21:06:27.577000 23819 torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation.
+W1026 21:06:27.577000 23819 torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+W1026 21:06:27.749000 23819 torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation.
+W1026 21:06:27.749000 23819 torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+{
+  "amortization": {
+    "mega_inplace": {
+      "break_even_defined": false,
+      "break_even_steps": null,
+      "incremental_setup_seconds": -0.6384752200683579,
+      "reference": "inductor_inplace_strict",
+      "reference_setup_seconds": 0.849941672058776,
+      "setup_scope": "compilation plus CUDA Graph capture for both methods",
+      "setup_seconds": 0.21146645199041814,
+      "steady_state_savings_ms_per_step": -0.16014240086078643
+    },
+    "megakernel": {
+      "break_even_defined": false,
+      "break_even_steps": null,
+      "incremental_setup_seconds": 0.16542980098165572,
+      "reference": "inductor_inplace_strict",
+      "reference_setup_seconds": 0.849941672058776,
+      "setup_scope": "compilation plus CUDA Graph capture for both methods",
+      "setup_seconds": 1.0153714730404317,
+      "steady_state_savings_ms_per_step": -0.18363119661808014
+    }
+  },
+  "bootstrap_vs_fastest_all_inductor": {
+    "ci95_ratio": [
+      6.060486316680908,
+      6.500544548034668
+    ],
+    "draws": 2000,
+    "median_ratio": 6.174753189086914,
+    "seed": 0
+  },
+  "bootstrap_vs_fastest_passing_inductor": {
+    "ci95_ratio": [
+      6.060486316680908,
+      6.500544548034668
+    ],
+    "draws": 2000,
+    "median_ratio": 6.174753189086914,
+    "seed": 0
+  },
+  "bootstrap_vs_fastest_passing_reference": {
+    "ci95_ratio": [
+      6.060486316680908,
+      6.500544548034668
+    ],
+    "draws": 2000,
+    "median_ratio": 6.174753189086914,
+    "seed": 0
+  },
+  "capture_seconds": {
+    "eager_graph": 0.18829440395347774,
+    "inductor": 0.09912678599357605,
+    "inductor_inplace": 0.10732616402674466,
+    "inductor_inplace_strict": 0.11216020002029836,
+    "inductor_strict": 0.10848931898362935,
+    "mega_inplace": 0.15525740303564817,
+    "megakernel": 0.14127684908453375
+  },
+  "compilation_seconds": {
+    "eager_graph": 0.0,
+    "inductor": 1.9360332009382546,
+    "inductor_inplace": 0.5510117780650035,
+    "inductor_inplace_strict": 0.7377814720384777,
+    "inductor_strict": 0.42040553491096944,
+    "mega_inplace": 0.05620904895476997,
+    "megakernel": 0.874094623955898
+  },
+  "config": {
+    "batch": 128,
+    "batches": 4,
+    "blocks_per_sm": 2,
+    "gemm_k_tile": 32,
+    "gemm_tile_n": 32,
+    "hidden": 1024,
+    "hopper_wgmma": false,
+    "inductor_mode": "max-autotune-no-cudagraphs",
+    "input": 512,
+    "json": "/root/h100-final-evidence/heldout/medium-seed211.json",
+    "max_blocks": 264,
+    "no_inline_input_casts": false,
+    "output": 256,
+    "samples": 30,
+    "seed": 211,
+    "shared_skew": 16,
+    "split_k_gemv": false,
+    "steps": 20,
+    "task": "regression",
+    "threads_per_block": 128,
+    "trajectory_steps": 100,
+    "warmup": 10
+  },
+  "cuda_source_sha256": {
+    "mega_inplace": "e6c2ff05d60ea41dab41e22092d2c59792161f9b360845721d38d5bd2c70ba28",
+    "megakernel": "18e6dc166d7cc16b9e5d84fba5c2da8ffdb9ed2aa3526ddefac0948b0447c1ff"
+  },
+  "device": "NVIDIA H100 80GB HBM3",
+  "fastest_all_inductor": "inductor_inplace_strict",
+  "fastest_passing_inductor": "inductor_inplace_strict",
+  "fastest_passing_reference": "inductor_inplace_strict",
+  "kernel": {
+    "mega_inplace": {
+      "direct_state_commits": 4,
+      "grid_barriers": 9,
+      "inlined_operations": 18,
+      "materialized_operations": 16,
+      "max_work_blocks": 4096,
+      "tensor_core_operations": 5,
+      "workspace_elements": 328704
+    },
+    "megakernel": {
+      "direct_state_commits": 0,
+      "grid_barriers": 9,
+      "inlined_operations": 18,
+      "materialized_operations": 14,
+      "max_work_blocks": 4096,
+      "tensor_core_operations": 5,
+      "workspace_elements": 328704
+    }
+  },
+  "kernel_config": {
+    "blocks_per_sm": 2,
+    "gemm_k_tile": 32,
+    "gemm_tile_n": 32,
+    "hopper_wgmma": false,
+    "inline_input_casts": true,
+    "max_blocks": 264,
+    "shared_skew": 16,
+    "split_k_gemv": false,
+    "threads_per_block": 128
+  },
+  "mega_inplace_bootstrap_vs_fastest_inductor": {
+    "ci95_ratio": [
+      6.060486316680908,
+      6.500544548034668
+    ],
+    "draws": 2000,
+    "median_ratio": 6.174753189086914,
+    "seed": 0
+  },
+  "numerical_policy": "FP32 master weights; BF16 compute casts; all losses, gradients, and updates checked",
+  "numerical_tolerances": {
+    "gradients_bf16_compute": {
+      "atol": 0.004,
+      "rtol": 0.04
+    },
+    "loss_fp32": {
+      "atol": 2e-05,
+      "rtol": 0.0002
+    },
+    "updates_fp32": {
+      "atol": 2e-05,
+      "rtol": 0.0002
+    }
+  },
+  "objective": "mean squared error on teacher outputs",
+  "optimizer": "sgd",
+  "replay_correctness": {
+    "eager_graph": {
+      "passed": true
+    },
+    "inductor": {
+      "passed": true
+    },
+    "inductor_inplace": {
+      "passed": true
+    },
+    "inductor_inplace_strict": {
+      "passed": true
+    },
+    "inductor_strict": {
+      "passed": true
+    },
+    "mega_inplace": {
+      "passed": true
+    },
+    "megakernel": {
+      "passed": true
+    }
+  },
+  "resource_usage": {
+    "mega_inplace": {
+      "local_bytes_per_thread": 0,
+      "registers_per_thread": 54,
+      "resident_blocks_per_sm": 9,
+      "shared_bytes_per_block": 11776
+    },
+    "megakernel": {
+      "local_bytes_per_thread": 0,
+      "registers_per_thread": 46,
+      "resident_blocks_per_sm": 10,
+      "shared_bytes_per_block": 11776
+    }
+  },
+  "software": {
+    "cuda": "12.8",
+    "torch": "2.8.0+cu128"
+  },
+  "source_sha256": {
+    "benchmarks/train_loop.py": "c6003c6135be433c445ded46de8e94eb81840d55dd1a35810b6cc280b97f549c",
+    "trainkernel/__init__.py": "ab7467dee83509e0831cdde7c4e898c050714a3dfc56cb0ca9d1fed571980b09",
+    "trainkernel/codegen.py": "b24a37ef49c946c303535a8b099c46cd32f3970e5a083bda19480b12324fed08",
+    "trainkernel/frontend.py": "cde0b4e819a972505fe5e00bee48ac55b7df9141867a39a65405335e9e738445",
+    "trainkernel/gemv.py": "4f8ebaff4ec98f7b07f511a3fd7283f1962bfc01278b5409021e9411a8a09f77",
+    "trainkernel/ir.py": "82121c877c755d79e2e02e71a3d7caca105cc37b3e14a6e52951976b131c2e0f",
+    "trainkernel/passes.py": "a70dd5b4d788dc24b1500305a6038bd5c672de59551616b833cc87bc3622f4ab",
+    "trainkernel/reference.py": "f2a653caae8f631fd56829fac01673fd5dc0132d6ba67774b1a014cf21bc6b73",
+    "trainkernel/runtime.py": "52168d3ca934234100b6b20a5be70021980704f493d7f4ba3648b83512aef091",
+    "trainkernel/sm90.py": "9736572cb085315ce845260e65df9564a69bc0d0bfb129bf2540d860a7bd7c3a",
+    "trainkernel/wmma.py": "4d58c59f838c50111cff50bfec1711917bef8cf9a6a4b154b269ccb3e8bf3d16"
+  },
+  "speed_ratio_vs_fastest_all_inductor": {
+    "eager_graph": 3.020083291135072,
+    "inductor": 1.1753470391745258,
+    "inductor_inplace": 1.032670842296552,
+    "inductor_inplace_strict": 1.0,
+    "inductor_strict": 1.1507405662453003,
+    "mega_inplace": 6.174028999473208,
+    "megakernel": 6.932926766446177
+  },
+  "speed_ratio_vs_fastest_passing_inductor": {
+    "eager_graph": 3.020083291135072,
+    "inductor": 1.1753470391745258,
+    "inductor_inplace": 1.032670842296552,
+    "inductor_inplace_strict": 1.0,
+    "inductor_strict": 1.1507405662453003,
+    "mega_inplace": 6.174028999473208,
+    "megakernel": 6.932926766446177
+  },
+  "speed_ratio_vs_fastest_passing_reference": {
+    "eager_graph": 3.020083291135072,
+    "inductor": 1.1753470391745258,
+    "inductor_inplace": 1.032670842296552,
+    "inductor_inplace_strict": 1.0,
+    "inductor_strict": 1.1507405662453003,
+    "mega_inplace": 6.174028999473208,
+    "megakernel": 6.932926766446177
+  },
+  "status": "ok",
+  "strict_inductor_options": {
+    "coordinate_descent_tuning": true,
+    "emulate_precision_casts": true,
+    "max_autotune": true
+  },
+  "task": "regression",
+  "timings": {
+    "eager_graph": {
+      "median_ms": 0.09347519874572754,
+      "p10_ms": 0.093367999792099,
+      "p90_ms": 0.09392799735069275,
+      "raw_ms": [
+        0.09407680034637451,
+        0.09392799735069275,
+        0.09394879937171936,
+        0.09392160177230835,
+        0.09377599954605102,
+        0.09353439807891846,
+        0.09343519806861877,
+        0.09343519806861877,
+        0.09340159893035889,
+        0.09333760142326356,
+        0.09348800182342529,
+        0.09371359944343567,
+        0.09343680143356323,
+        0.09354879856109619,
+        0.09354559779167175,
+        0.09332960247993469,
+        0.093367999792099,
+        0.09340159893035889,
+        0.09348160028457642,
+        0.09342880249023437,
+        0.09355999827384949,
+        0.09580640196800232,
+        0.09349920153617859,
+        0.09343360066413879,
+        0.09341599941253662,
+        0.09345120191574097,
+        0.09343839883804321,
+        0.09346879720687866,
+        0.09348639845848083,
+        0.09342880249023437
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    },
+    "inductor": {
+      "median_ms": 0.03637840002775192,
+      "p10_ms": 0.03630560040473938,
+      "p90_ms": 0.0368367999792099,
+      "raw_ms": [
+        0.0368367999792099,
+        0.036643201112747194,
+        0.0366239994764328,
+        0.0366703987121582,
+        0.03630560040473938,
+        0.03637920022010803,
+        0.03639839887619019,
+        0.036345601081848145,
+        0.03631199896335602,
+        0.036392000317573545,
+        0.03640320003032684,
+        0.036934399604797365,
+        0.03636159896850586,
+        0.03637759983539581,
+        0.03630079925060272,
+        0.03630079925060272,
+        0.03638879954814911,
+        0.036508798599243164,
+        0.03633280098438263,
+        0.03634400069713593,
+        0.036345601081848145,
+        0.0378383994102478,
+        0.03638879954814911,
+        0.036355200409889224,
+        0.03638240098953247,
+        0.036985599994659425,
+        0.03633440136909485,
+        0.03632160127162933,
+        0.03636319935321808,
+        0.036329600214958194
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    },
+    "inductor_inplace": {
+      "median_ms": 0.031962400674819945,
+      "p10_ms": 0.03113600015640259,
+      "p90_ms": 0.03223359882831574,
+      "raw_ms": [
+        0.032287999987602234,
+        0.03138720095157623,
+        0.03223359882831574,
+        0.031385600566864014,
+        0.03213759958744049,
+        0.031206399202346802,
+        0.03214559853076935,
+        0.031179198622703554,
+        0.032092800736427306,
+        0.03118399977684021,
+        0.03225919902324677,
+        0.031857600808143614,
+        0.03208000063896179,
+        0.03113600015640259,
+        0.032148799300193785,
+        0.031164801120758055,
+        0.03213759958744049,
+        0.031108799576759338,
+        0.03210720121860504,
+        0.031142398715019226,
+        0.03211680054664612,
+        0.031123200058937074,
+        0.03267039954662323,
+        0.031188800930976868,
+        0.03212479948997497,
+        0.031147199869155883,
+        0.032067200541496275,
+        0.031171199679374696,
+        0.03215680122375488,
+        0.031190401315689086
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    },
+    "inductor_inplace_strict": {
+      "median_ms": 0.03095119893550873,
+      "p10_ms": 0.02919520139694214,
+      "p90_ms": 0.03163839876651764,
+      "raw_ms": [
+        0.0318336009979248,
+        0.02940320074558258,
+        0.03171679973602295,
+        0.029407998919486998,
+        0.031516799330711366,
+        0.02919520139694214,
+        0.03152480125427246,
+        0.02932479977607727,
+        0.031553599238395694,
+        0.029193601012229918,
+        0.03163839876651764,
+        0.030399999022483824,
+        0.031548801064491275,
+        0.029198399186134337,
+        0.03156639933586121,
+        0.02922559976577759,
+        0.03151200115680695,
+        0.029187199473381043,
+        0.031542399525642396,
+        0.029216000437736513,
+        0.03150239884853363,
+        0.02919520139694214,
+        0.03224479854106903,
+        0.029203200340270997,
+        0.031553599238395694,
+        0.029211199283599852,
+        0.0315311998128891,
+        0.029207998514175416,
+        0.03160960078239441,
+        0.029198399186134337
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    },
+    "inductor_strict": {
+      "median_ms": 0.03561680018901825,
+      "p10_ms": 0.03557440042495728,
+      "p90_ms": 0.0358704000711441,
+      "raw_ms": [
+        0.0358704000711441,
+        0.03577280044555664,
+        0.035873600840568544,
+        0.035780799388885495,
+        0.035545599460601804,
+        0.03564960062503815,
+        0.03558399975299835,
+        0.03557440042495728,
+        0.035576000809669495,
+        0.03561919927597046,
+        0.035631999373435974,
+        0.03850719928741455,
+        0.03561440110206604,
+        0.03564960062503815,
+        0.03558399975299835,
+        0.03564000129699707,
+        0.03559359908103943,
+        0.03562400043010712,
+        0.03562400043010712,
+        0.03559040129184723,
+        0.03559519946575165,
+        0.03558239936828613,
+        0.0363072007894516,
+        0.035683199763298035,
+        0.03557440042495728,
+        0.035585600137710574,
+        0.03555200099945068,
+        0.035606399178504944,
+        0.03559359908103943,
+        0.03564479947090149
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    },
+    "mega_inplace": {
+      "median_ms": 0.19109359979629517,
+      "p10_ms": 0.18973439931869507,
+      "p90_ms": 0.19131360054016114,
+      "raw_ms": [
+        0.1927904009819031,
+        0.1913040041923523,
+        0.1929327964782715,
+        0.19131360054016114,
+        0.19126559495925904,
+        0.18972320556640626,
+        0.19115999937057496,
+        0.18973439931869507,
+        0.1911903977394104,
+        0.18982720375061035,
+        0.1912816047668457,
+        0.19071999788284302,
+        0.1913151979446411,
+        0.18982399702072145,
+        0.19103360176086426,
+        0.18974239826202394,
+        0.19114880561828612,
+        0.18986560106277467,
+        0.1910928010940552,
+        0.1898128032684326,
+        0.19118720293045044,
+        0.18999040126800537,
+        0.1911888003349304,
+        0.1897711992263794,
+        0.1912176012992859,
+        0.18974560499191284,
+        0.19109439849853516,
+        0.18978400230407716,
+        0.19113759994506835,
+        0.1897264003753662
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    },
+    "megakernel": {
+      "median_ms": 0.21458239555358888,
+      "p10_ms": 0.21248478889465333,
+      "p90_ms": 0.21490879058837892,
+      "raw_ms": [
+        0.21577439308166504,
+        0.21651840209960938,
+        0.21452798843383789,
+        0.2164544105529785,
+        0.21429760456085206,
+        0.21472320556640626,
+        0.21246399879455566,
+        0.21484320163726806,
+        0.2124255895614624,
+        0.21490879058837892,
+        0.21248478889465333,
+        0.21489279270172118,
+        0.212608003616333,
+        0.2146384000778198,
+        0.2126431941986084,
+        0.21479520797729493,
+        0.2126784086227417,
+        0.21463680267333984,
+        0.21255359649658204,
+        0.21466081142425536,
+        0.2124880075454712,
+        0.21487040519714357,
+        0.21267199516296387,
+        0.2147183895111084,
+        0.21256799697875978,
+        0.2144752025604248,
+        0.21271839141845703,
+        0.2147887945175171,
+        0.21256000995635987,
+        0.21474239826202393
+      ],
+      "samples": 30,
+      "steps_per_replay": 20
+    }
+  },
+  "trajectory": {
+    "eager_graph": {
+      "all_finite": true,
+      "failure_count": 0,
+      "failures": [],
+      "final_cycle_loss": 2.038874924182892,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": null,
+      "initial_cycle_loss": 3.7107359170913696,
+      "loss_decreased": true,
+      "losses": [
+        3.7175660133361816,
+        3.7432096004486084,
+        3.709397315979004,
+        3.6727707386016846,
+        3.6379313468933105,
+        3.643483877182007,
+        3.602766513824463,
+        3.5650107860565186,
+        3.5325441360473633,
+        3.538412094116211,
+        3.5008039474487305,
+        3.464841842651367,
+        3.434718132019043,
+        3.4403841495513916,
+        3.4044013023376465,
+        3.3699960708618164,
+        3.3422188758850098,
+        3.347459077835083,
+        3.3131771087646484,
+        3.279216766357422,
+        3.2530226707458496,
+        3.2577834129333496,
+        3.225154399871826,
+        3.1919703483581543,
+        3.1682944297790527,
+        3.172513008117676,
+        3.1412549018859863,
+        3.1085238456726074,
+        3.085956573486328,
+        3.090308666229248,
+        3.0601205825805664,
+        3.0280027389526367,
+        3.0067312717437744,
+        3.0107133388519287,
+        2.981781005859375,
+        2.9506564140319824,
+        2.9304208755493164,
+        2.9337687492370605,
+        2.9060792922973633,
+        2.8754358291625977,
+        2.856743812561035,
+        2.8597583770751953,
+        2.833250045776367,
+        2.8031156063079834,
+        2.7859227657318115,
+        2.7884957790374756,
+        2.7628893852233887,
+        2.7330493927001953,
+        2.7172694206237793,
+        2.71889591217041,
+        2.6945860385894775,
+        2.665066719055176,
+        2.650505542755127,
+        2.6520066261291504,
+        2.6283764839172363,
+        2.5996344089508057,
+        2.5863900184631348,
+        2.5878782272338867,
+        2.5654690265655518,
+        2.536832094192505,
+        2.5247371196746826,
+        2.5256993770599365,
+        2.5040459632873535,
+        2.47628116607666,
+        2.464627265930176,
+        2.465487003326416,
+        2.444732904434204,
+        2.4171218872070312,
+        2.407136917114258,
+        2.4074854850769043,
+        2.387346029281616,
+        2.3604726791381836,
+        2.3509361743927,
+        2.351195812225342,
+        2.3322432041168213,
+        2.305723190307617,
+        2.296936511993408,
+        2.297086715698242,
+        2.278567314147949,
+        2.252656936645508,
+        2.2452688217163086,
+        2.244774341583252,
+        2.2271480560302734,
+        2.2013731002807617,
+        2.1944069862365723,
+        2.194242477416992,
+        2.177274703979492,
+        2.151477098464966,
+        2.145678997039795,
+        2.1449880599975586,
+        2.1287388801574707,
+        2.1037096977233887,
+        2.09859037399292,
+        2.097820997238159,
+        2.0822410583496094,
+        2.0573058128356934,
+        2.0529603958129883,
+        2.0523195266723633,
+        2.037290573120117,
+        2.0129292011260986
+      ],
+      "max_absolute_error": 0.0,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.0,
+        "loss": 0.0,
+        "updates": 0.0
+      },
+      "passed": true
+    },
+    "inductor": {
+      "all_finite": true,
+      "failure_count": 81,
+      "failures": [
+        {
+          "error": "Scalars are not close!\n\nExpected 3.347459077835083 but got 3.3467495441436768.\nAbsolute difference: 0.00070953369140625 (up to 2e-05 allowed)\nRelative difference: 0.0002119618716489672 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.00070953369140625,
+          "step": 17
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.2530226707458496 but got 3.252173662185669.\nAbsolute difference: 0.0008490085601806641 (up to 2e-05 allowed)\nRelative difference: 0.00026099066809946465 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0008490085601806641,
+          "step": 20
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.2577834129333496 but got 3.256840705871582.\nAbsolute difference: 0.0009427070617675781 (up to 2e-05 allowed)\nRelative difference: 0.0002893706985016394 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009427070617675781,
+          "step": 21
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.225154399871826 but got 3.2242634296417236.\nAbsolute difference: 0.0008909702301025391 (up to 2e-05 allowed)\nRelative difference: 0.0002762566127494386 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0008909702301025391,
+          "step": 22
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1919703483581543 but got 3.1911749839782715.\nAbsolute difference: 0.0007953643798828125 (up to 2e-05 allowed)\nRelative difference: 0.00024917661916625325 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0007953643798828125,
+          "step": 23
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1682944297790527 but got 3.1672608852386475.\nAbsolute difference: 0.0010335445404052734 (up to 2e-05 allowed)\nRelative difference: 0.00032621480210011594 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0010335445404052734,
+          "step": 24
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.172513008117676 but got 3.1715850830078125.\nAbsolute difference: 0.0009279251098632812 (up to 2e-05 allowed)\nRelative difference: 0.0002924889850692339 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009279251098632812,
+          "step": 25
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1412549018859863 but got 3.1401748657226562.\nAbsolute difference: 0.0010800361633300781 (up to 2e-05 allowed)\nRelative difference: 0.0003438231525501583 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0010800361633300781,
+          "step": 26
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1085238456726074 but got 3.1077475547790527.\nAbsolute difference: 0.0007762908935546875 (up to 2e-05 allowed)\nRelative difference: 0.00024972975344402334 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0007762908935546875,
+          "step": 27
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.085956573486328 but got 3.0850367546081543.\nAbsolute difference: 0.0009198188781738281 (up to 2e-05 allowed)\nRelative difference: 0.00029806604735680775 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009198188781738281,
+          "step": 28
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.090308666229248 but got 3.0890674591064453.\nAbsolute difference: 0.0012412071228027344 (up to 2e-05 allowed)\nRelative difference: 0.00040164503189166477 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012412071228027344,
+          "step": 29
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0601205825805664 but got 3.0591797828674316.\nAbsolute difference: 0.0009407997131347656 (up to 2e-05 allowed)\nRelative difference: 0.00030743877169095066 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009407997131347656,
+          "step": 30
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0280027389526367 but got 3.0269694328308105.\nAbsolute difference: 0.0010333061218261719 (up to 2e-05 allowed)\nRelative difference: 0.0003412500618092521 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0010333061218261719,
+          "step": 31
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0067312717437744 but got 3.0056614875793457.\nAbsolute difference: 0.001069784164428711 (up to 2e-05 allowed)\nRelative difference: 0.00035579640072332845 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001069784164428711,
+          "step": 32
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0107133388519287 but got 3.0094094276428223.\nAbsolute difference: 0.0013039112091064453 (up to 2e-05 allowed)\nRelative difference: 0.0004330904547703183 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013039112091064453,
+          "step": 33
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.981781005859375 but got 2.9806790351867676.\nAbsolute difference: 0.0011019706726074219 (up to 2e-05 allowed)\nRelative difference: 0.0003695679429314174 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011019706726074219,
+          "step": 34
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9506564140319824 but got 2.9495527744293213.\nAbsolute difference: 0.0011036396026611328 (up to 2e-05 allowed)\nRelative difference: 0.0003740318925011817 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011036396026611328,
+          "step": 35
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9304208755493164 but got 2.929312229156494.\nAbsolute difference: 0.0011086463928222656 (up to 2e-05 allowed)\nRelative difference: 0.00037832326478170016 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011086463928222656,
+          "step": 36
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9337687492370605 but got 2.9323782920837402.\nAbsolute difference: 0.0013904571533203125 (up to 2e-05 allowed)\nRelative difference: 0.00047394913238540254 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013904571533203125,
+          "step": 37
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9060792922973633 but got 2.904815673828125.\nAbsolute difference: 0.0012636184692382812 (up to 2e-05 allowed)\nRelative difference: 0.0004348189922372504 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012636184692382812,
+          "step": 38
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.8754358291625977 but got 2.874305248260498.\nAbsolute difference: 0.0011305809020996094 (up to 2e-05 allowed)\nRelative difference: 0.0003931859270282739 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011305809020996094,
+          "step": 39
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.856743812561035 but got 2.8556137084960938.\nAbsolute difference: 0.0011301040649414062 (up to 2e-05 allowed)\nRelative difference: 0.0003955916732793348 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011301040649414062,
+          "step": 40
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.8597583770751953 but got 2.858538866043091.\nAbsolute difference: 0.0012195110321044922 (up to 2e-05 allowed)\nRelative difference: 0.00042643848581072836 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012195110321044922,
+          "step": 41
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.833250045776367 but got 2.8320274353027344.\nAbsolute difference: 0.0012226104736328125 (up to 2e-05 allowed)\nRelative difference: 0.0004315222637886847 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012226104736328125,
+          "step": 42
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.8031156063079834 but got 2.801942825317383.\nAbsolute difference: 0.001172780990600586 (up to 2e-05 allowed)\nRelative difference: 0.00041838481008825375 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001172780990600586,
+          "step": 43
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7859227657318115 but got 2.7847368717193604.\nAbsolute difference: 0.0011858940124511719 (up to 2e-05 allowed)\nRelative difference: 0.000425673685946444 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011858940124511719,
+          "step": 44
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7884957790374756 but got 2.787217140197754.\nAbsolute difference: 0.0012786388397216797 (up to 2e-05 allowed)\nRelative difference: 0.00045854071192570937 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012786388397216797,
+          "step": 45
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7628893852233887 but got 2.761650323867798.\nAbsolute difference: 0.0012390613555908203 (up to 2e-05 allowed)\nRelative difference: 0.0004484657844854828 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012390613555908203,
+          "step": 46
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7330493927001953 but got 2.731640338897705.\nAbsolute difference: 0.0014090538024902344 (up to 2e-05 allowed)\nRelative difference: 0.0005155610455682687 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014090538024902344,
+          "step": 47
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7172694206237793 but got 2.7159488201141357.\nAbsolute difference: 0.0013206005096435547 (up to 2e-05 allowed)\nRelative difference: 0.00048600278633408246 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013206005096435547,
+          "step": 48
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.71889591217041 but got 2.717434883117676.\nAbsolute difference: 0.001461029052734375 (up to 2e-05 allowed)\nRelative difference: 0.0005373611568557918 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001461029052734375,
+          "step": 49
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.6945860385894775 but got 2.6931889057159424.\nAbsolute difference: 0.0013971328735351562 (up to 2e-05 allowed)\nRelative difference: 0.0005184962935035865 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013971328735351562,
+          "step": 50
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.665066719055176 but got 2.6637420654296875.\nAbsolute difference: 0.0013246536254882812 (up to 2e-05 allowed)\nRelative difference: 0.0004970433257888192 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013246536254882812,
+          "step": 51
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.650505542755127 but got 2.6491265296936035.\nAbsolute difference: 0.0013790130615234375 (up to 2e-05 allowed)\nRelative difference: 0.0005202830325304628 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013790130615234375,
+          "step": 52
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.6520066261291504 but got 2.6506576538085938.\nAbsolute difference: 0.0013489723205566406 (up to 2e-05 allowed)\nRelative difference: 0.0005086609917432939 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013489723205566406,
+          "step": 53
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.6283764839172363 but got 2.627142906188965.\nAbsolute difference: 0.0012335777282714844 (up to 2e-05 allowed)\nRelative difference: 0.000469330682198543 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012335777282714844,
+          "step": 54
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5996344089508057 but got 2.598289728164673.\nAbsolute difference: 0.0013446807861328125 (up to 2e-05 allowed)\nRelative difference: 0.0005172576503461178 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013446807861328125,
+          "step": 55
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5863900184631348 but got 2.5849854946136475.\nAbsolute difference: 0.0014045238494873047 (up to 2e-05 allowed)\nRelative difference: 0.000543044103735712 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014045238494873047,
+          "step": 56
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5878782272338867 but got 2.5864129066467285.\nAbsolute difference: 0.0014653205871582031 (up to 2e-05 allowed)\nRelative difference: 0.0005662247055281441 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014653205871582031,
+          "step": 57
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5654690265655518 but got 2.563922882080078.\nAbsolute difference: 0.0015461444854736328 (up to 2e-05 allowed)\nRelative difference: 0.000602675171465036 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015461444854736328,
+          "step": 58
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.536832094192505 but got 2.5354690551757812.\nAbsolute difference: 0.0013630390167236328 (up to 2e-05 allowed)\nRelative difference: 0.0005372996580435882 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013630390167236328,
+          "step": 59
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5247371196746826 but got 2.5233280658721924.\nAbsolute difference: 0.0014090538024902344 (up to 2e-05 allowed)\nRelative difference: 0.0005580992141755312 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014090538024902344,
+          "step": 60
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5256993770599365 but got 2.5240912437438965.\nAbsolute difference: 0.001608133316040039 (up to 2e-05 allowed)\nRelative difference: 0.0006367081255378862 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001608133316040039,
+          "step": 61
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5040459632873535 but got 2.5025296211242676.\nAbsolute difference: 0.0015163421630859375 (up to 2e-05 allowed)\nRelative difference: 0.0006055568409356425 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015163421630859375,
+          "step": 62
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.47628116607666 but got 2.474794864654541.\nAbsolute difference: 0.0014863014221191406 (up to 2e-05 allowed)\nRelative difference: 0.0006002151300427603 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014863014221191406,
+          "step": 63
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.464627265930176 but got 2.463071346282959.\nAbsolute difference: 0.0015559196472167969 (up to 2e-05 allowed)\nRelative difference: 0.0006313001843017333 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015559196472167969,
+          "step": 64
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.465487003326416 but got 2.4640250205993652.\nAbsolute difference: 0.0014619827270507812 (up to 2e-05 allowed)\nRelative difference: 0.0005929792876937844 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014619827270507812,
+          "step": 65
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.444732904434204 but got 2.4431309700012207.\nAbsolute difference: 0.0016019344329833984 (up to 2e-05 allowed)\nRelative difference: 0.000655259488706453 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016019344329833984,
+          "step": 66
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.4171218872070312 but got 2.415734052658081.\nAbsolute difference: 0.0013878345489501953 (up to 2e-05 allowed)\nRelative difference: 0.0005741682106705133 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013878345489501953,
+          "step": 67
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.407136917114258 but got 2.4056429862976074.\nAbsolute difference: 0.0014939308166503906 (up to 2e-05 allowed)\nRelative difference: 0.0006206256096314438 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014939308166503906,
+          "step": 68
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.4074854850769043 but got 2.405970573425293.\nAbsolute difference: 0.0015149116516113281 (up to 2e-05 allowed)\nRelative difference: 0.0006292505857259347 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015149116516113281,
+          "step": 69
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.387346029281616 but got 2.385869026184082.\nAbsolute difference: 0.0014770030975341797 (up to 2e-05 allowed)\nRelative difference: 0.0006186799397398748 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014770030975341797,
+          "step": 70
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.3604726791381836 but got 2.359025478363037.\nAbsolute difference: 0.0014472007751464844 (up to 2e-05 allowed)\nRelative difference: 0.0006130978714292351 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014472007751464844,
+          "step": 71
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.3509361743927 but got 2.3493282794952393.\nAbsolute difference: 0.0016078948974609375 (up to 2e-05 allowed)\nRelative difference: 0.0006839381328063034 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016078948974609375,
+          "step": 72
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.351195812225342 but got 2.34968638420105.\nAbsolute difference: 0.0015094280242919922 (up to 2e-05 allowed)\nRelative difference: 0.0006419831204374936 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015094280242919922,
+          "step": 73
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.3322432041168213 but got 2.330561637878418.\nAbsolute difference: 0.0016815662384033203 (up to 2e-05 allowed)\nRelative difference: 0.0007210080987416145 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016815662384033203,
+          "step": 74
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.305723190307617 but got 2.30423903465271.\nAbsolute difference: 0.0014841556549072266 (up to 2e-05 allowed)\nRelative difference: 0.0006436833619690569 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014841556549072266,
+          "step": 75
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.296936511993408 but got 2.295344352722168.\nAbsolute difference: 0.0015921592712402344 (up to 2e-05 allowed)\nRelative difference: 0.0006931664253351394 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015921592712402344,
+          "step": 76
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.297086715698242 but got 2.295474052429199.\nAbsolute difference: 0.0016126632690429688 (up to 2e-05 allowed)\nRelative difference: 0.0007020471878671633 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016126632690429688,
+          "step": 77
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.278567314147949 but got 2.2769532203674316.\nAbsolute difference: 0.0016140937805175781 (up to 2e-05 allowed)\nRelative difference: 0.000708380994713406 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016140937805175781,
+          "step": 78
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.252656936645508 but got 2.251131534576416.\nAbsolute difference: 0.0015254020690917969 (up to 2e-05 allowed)\nRelative difference: 0.0006771568472220693 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015254020690917969,
+          "step": 79
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.2452688217163086 but got 2.2436041831970215.\nAbsolute difference: 0.0016646385192871094 (up to 2e-05 allowed)\nRelative difference: 0.0007413983141736414 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016646385192871094,
+          "step": 80
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.244774341583252 but got 2.2431116104125977.\nAbsolute difference: 0.0016627311706542969 (up to 2e-05 allowed)\nRelative difference: 0.0007407119458972269 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016627311706542969,
+          "step": 81
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.2271480560302734 but got 2.2256691455841064.\nAbsolute difference: 0.0014789104461669922 (up to 2e-05 allowed)\nRelative difference: 0.0006640377778938687 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014789104461669922,
+          "step": 82
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.2013731002807617 but got 2.1998162269592285.\nAbsolute difference: 0.0015568733215332031 (up to 2e-05 allowed)\nRelative difference: 0.0007072282846259185 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015568733215332031,
+          "step": 83
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1944069862365723 but got 2.19282865524292.\nAbsolute difference: 0.0015783309936523438 (up to 2e-05 allowed)\nRelative difference: 0.0007192517174579341 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015783309936523438,
+          "step": 84
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.194242477416992 but got 2.1926426887512207.\nAbsolute difference: 0.0015997886657714844 (up to 2e-05 allowed)\nRelative difference: 0.000729084721600466 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015997886657714844,
+          "step": 85
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.177274703979492 but got 2.1756367683410645.\nAbsolute difference: 0.0016379356384277344 (up to 2e-05 allowed)\nRelative difference: 0.000752287084139642 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016379356384277344,
+          "step": 86
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.151477098464966 but got 2.150084972381592.\nAbsolute difference: 0.0013921260833740234 (up to 2e-05 allowed)\nRelative difference: 0.0006470559618632596 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013921260833740234,
+          "step": 87
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.145678997039795 but got 2.14414644241333.\nAbsolute difference: 0.0015325546264648438 (up to 2e-05 allowed)\nRelative difference: 0.0007142515858985314 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015325546264648438,
+          "step": 88
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1449880599975586 but got 2.1433141231536865.\nAbsolute difference: 0.0016739368438720703 (up to 2e-05 allowed)\nRelative difference: 0.0007803944810182186 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016739368438720703,
+          "step": 89
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1287388801574707 but got 2.1273574829101562.\nAbsolute difference: 0.0013813972473144531 (up to 2e-05 allowed)\nRelative difference: 0.0006489275223893435 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013813972473144531,
+          "step": 90
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1037096977233887 but got 2.102407455444336.\nAbsolute difference: 0.0013022422790527344 (up to 2e-05 allowed)\nRelative difference: 0.0006190218548034487 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013022422790527344,
+          "step": 91
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.09859037399292 but got 2.097123384475708.\nAbsolute difference: 0.001466989517211914 (up to 2e-05 allowed)\nRelative difference: 0.0006990356647928012 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001466989517211914,
+          "step": 92
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.097820997238159 but got 2.096381902694702.\nAbsolute difference: 0.0014390945434570312 (up to 2e-05 allowed)\nRelative difference: 0.0006859949182278374 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014390945434570312,
+          "step": 93
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0822410583496094 but got 2.080801248550415.\nAbsolute difference: 0.001439809799194336 (up to 2e-05 allowed)\nRelative difference: 0.0006914712364453775 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001439809799194336,
+          "step": 94
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0573058128356934 but got 2.055952310562134.\nAbsolute difference: 0.0013535022735595703 (up to 2e-05 allowed)\nRelative difference: 0.0006579003787939366 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013535022735595703,
+          "step": 95
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0529603958129883 but got 2.051530599594116.\nAbsolute difference: 0.0014297962188720703 (up to 2e-05 allowed)\nRelative difference: 0.0006964558214508857 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014297962188720703,
+          "step": 96
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0523195266723633 but got 2.0507254600524902.\nAbsolute difference: 0.0015940666198730469 (up to 2e-05 allowed)\nRelative difference: 0.0007767146388056206 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015940666198730469,
+          "step": 97
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.037290573120117 but got 2.035857677459717.\nAbsolute difference: 0.0014328956604003906 (up to 2e-05 allowed)\nRelative difference: 0.0007033339668410217 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014328956604003906,
+          "step": 98
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0129292011260986 but got 2.011550188064575.\nAbsolute difference: 0.0013790130615234375 (up to 2e-05 allowed)\nRelative difference: 0.0006850777765814974 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013790130615234375,
+          "step": 99
+        }
+      ],
+      "final_cycle_loss": 2.0374159812927246,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": 17,
+      "initial_cycle_loss": 3.71062433719635,
+      "loss_decreased": true,
+      "losses": [
+        3.7175774574279785,
+        3.7431368827819824,
+        3.70908784866333,
+        3.6726951599121094,
+        3.6377809047698975,
+        3.643098831176758,
+        3.60254168510437,
+        3.564889430999756,
+        3.532315969467163,
+        3.5380611419677734,
+        3.500278949737549,
+        3.464324951171875,
+        3.4342129230499268,
+        3.439772129058838,
+        3.4038281440734863,
+        3.3694629669189453,
+        3.3415627479553223,
+        3.3467495441436768,
+        3.3125410079956055,
+        3.278555154800415,
+        3.252173662185669,
+        3.256840705871582,
+        3.2242634296417236,
+        3.1911749839782715,
+        3.1672608852386475,
+        3.1715850830078125,
+        3.1401748657226562,
+        3.1077475547790527,
+        3.0850367546081543,
+        3.0890674591064453,
+        3.0591797828674316,
+        3.0269694328308105,
+        3.0056614875793457,
+        3.0094094276428223,
+        2.9806790351867676,
+        2.9495527744293213,
+        2.929312229156494,
+        2.9323782920837402,
+        2.904815673828125,
+        2.874305248260498,
+        2.8556137084960938,
+        2.858538866043091,
+        2.8320274353027344,
+        2.801942825317383,
+        2.7847368717193604,
+        2.787217140197754,
+        2.761650323867798,
+        2.731640338897705,
+        2.7159488201141357,
+        2.717434883117676,
+        2.6931889057159424,
+        2.6637420654296875,
+        2.6491265296936035,
+        2.6506576538085938,
+        2.627142906188965,
+        2.598289728164673,
+        2.5849854946136475,
+        2.5864129066467285,
+        2.563922882080078,
+        2.5354690551757812,
+        2.5233280658721924,
+        2.5240912437438965,
+        2.5025296211242676,
+        2.474794864654541,
+        2.463071346282959,
+        2.4640250205993652,
+        2.4431309700012207,
+        2.415734052658081,
+        2.4056429862976074,
+        2.405970573425293,
+        2.385869026184082,
+        2.359025478363037,
+        2.3493282794952393,
+        2.34968638420105,
+        2.330561637878418,
+        2.30423903465271,
+        2.295344352722168,
+        2.295474052429199,
+        2.2769532203674316,
+        2.251131534576416,
+        2.2436041831970215,
+        2.2431116104125977,
+        2.2256691455841064,
+        2.1998162269592285,
+        2.19282865524292,
+        2.1926426887512207,
+        2.1756367683410645,
+        2.150084972381592,
+        2.14414644241333,
+        2.1433141231536865,
+        2.1273574829101562,
+        2.102407455444336,
+        2.097123384475708,
+        2.096381902694702,
+        2.080801248550415,
+        2.055952310562134,
+        2.051530599594116,
+        2.0507254600524902,
+        2.035857677459717,
+        2.011550188064575
+      ],
+      "max_absolute_error": 0.0016815662384033203,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.0006308808806352317,
+        "loss": 0.0016815662384033203,
+        "updates": 1.2431293725967407e-05
+      },
+      "passed": false
+    },
+    "inductor_inplace": {
+      "all_finite": true,
+      "failure_count": 82,
+      "failures": [
+        {
+          "error": "Scalars are not close!\n\nExpected 3.3422188758850098 but got 3.341519355773926.\nAbsolute difference: 0.0006995201110839844 (up to 2e-05 allowed)\nRelative difference: 0.00020929811513279586 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0006995201110839844,
+          "step": 16
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.347459077835083 but got 3.34675931930542.\nAbsolute difference: 0.0006997585296630859 (up to 2e-05 allowed)\nRelative difference: 0.0002090416980140184 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0006997585296630859,
+          "step": 17
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.2530226707458496 but got 3.2521719932556152.\nAbsolute difference: 0.000850677490234375 (up to 2e-05 allowed)\nRelative difference: 0.0002615037078851137 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.000850677490234375,
+          "step": 20
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.2577834129333496 but got 3.256880283355713.\nAbsolute difference: 0.0009031295776367188 (up to 2e-05 allowed)\nRelative difference: 0.000277222105696563 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009031295776367188,
+          "step": 21
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.225154399871826 but got 3.224287748336792.\nAbsolute difference: 0.0008666515350341797 (up to 2e-05 allowed)\nRelative difference: 0.0002687162931078965 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0008666515350341797,
+          "step": 22
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1919703483581543 but got 3.1911745071411133.\nAbsolute difference: 0.0007958412170410156 (up to 2e-05 allowed)\nRelative difference: 0.0002493260056285831 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0007958412170410156,
+          "step": 23
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1682944297790527 but got 3.1672682762145996.\nAbsolute difference: 0.001026153564453125 (up to 2e-05 allowed)\nRelative difference: 0.00032388200882096864 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001026153564453125,
+          "step": 24
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.172513008117676 but got 3.1715617179870605.\nAbsolute difference: 0.0009512901306152344 (up to 2e-05 allowed)\nRelative difference: 0.0002998538156285312 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009512901306152344,
+          "step": 25
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1412549018859863 but got 3.1401896476745605.\nAbsolute difference: 0.0010652542114257812 (up to 2e-05 allowed)\nRelative difference: 0.00033911740520841223 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0010652542114257812,
+          "step": 26
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.1085238456726074 but got 3.1077325344085693.\nAbsolute difference: 0.0007913112640380859 (up to 2e-05 allowed)\nRelative difference: 0.0002545617480591872 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0007913112640380859,
+          "step": 27
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.085956573486328 but got 3.085066795349121.\nAbsolute difference: 0.0008897781372070312 (up to 2e-05 allowed)\nRelative difference: 0.0002883313864011422 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0008897781372070312,
+          "step": 28
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.090308666229248 but got 3.089083671569824.\nAbsolute difference: 0.0012249946594238281 (up to 2e-05 allowed)\nRelative difference: 0.000396398804045212 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012249946594238281,
+          "step": 29
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0601205825805664 but got 3.0591673851013184.\nAbsolute difference: 0.0009531974792480469 (up to 2e-05 allowed)\nRelative difference: 0.0003114901695946327 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0009531974792480469,
+          "step": 30
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0280027389526367 but got 3.0269861221313477.\nAbsolute difference: 0.0010166168212890625 (up to 2e-05 allowed)\nRelative difference: 0.0003357384087574183 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0010166168212890625,
+          "step": 31
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0067312717437744 but got 3.005650758743286.\nAbsolute difference: 0.0010805130004882812 (up to 2e-05 allowed)\nRelative difference: 0.00035936467307290496 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0010805130004882812,
+          "step": 32
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 3.0107133388519287 but got 3.009429931640625.\nAbsolute difference: 0.001283407211303711 (up to 2e-05 allowed)\nRelative difference: 0.00042628010934880667 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001283407211303711,
+          "step": 33
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.981781005859375 but got 2.9806721210479736.\nAbsolute difference: 0.0011088848114013672 (up to 2e-05 allowed)\nRelative difference: 0.0003718867379000481 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011088848114013672,
+          "step": 34
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9506564140319824 but got 2.9495418071746826.\nAbsolute difference: 0.0011146068572998047 (up to 2e-05 allowed)\nRelative difference: 0.0003777487788816212 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011146068572998047,
+          "step": 35
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9304208755493164 but got 2.9293055534362793.\nAbsolute difference: 0.0011153221130371094 (up to 2e-05 allowed)\nRelative difference: 0.0003806013403545792 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011153221130371094,
+          "step": 36
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9337687492370605 but got 2.9324121475219727.\nAbsolute difference: 0.0013566017150878906 (up to 2e-05 allowed)\nRelative difference: 0.0004624092186681997 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013566017150878906,
+          "step": 37
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.9060792922973633 but got 2.9048070907592773.\nAbsolute difference: 0.0012722015380859375 (up to 2e-05 allowed)\nRelative difference: 0.00043777247973169204 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012722015380859375,
+          "step": 38
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.8754358291625977 but got 2.8742892742156982.\nAbsolute difference: 0.001146554946899414 (up to 2e-05 allowed)\nRelative difference: 0.00039874127437346463 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001146554946899414,
+          "step": 39
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.856743812561035 but got 2.8556036949157715.\nAbsolute difference: 0.0011401176452636719 (up to 2e-05 allowed)\nRelative difference: 0.0003990969159539618 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011401176452636719,
+          "step": 40
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.8597583770751953 but got 2.858546733856201.\nAbsolute difference: 0.0012116432189941406 (up to 2e-05 allowed)\nRelative difference: 0.0004236872697732398 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012116432189941406,
+          "step": 41
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.833250045776367 but got 2.8320093154907227.\nAbsolute difference: 0.0012407302856445312 (up to 2e-05 allowed)\nRelative difference: 0.00043791767955466364 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012407302856445312,
+          "step": 42
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.8031156063079834 but got 2.8019332885742188.\nAbsolute difference: 0.0011823177337646484 (up to 2e-05 allowed)\nRelative difference: 0.00042178700411214684 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0011823177337646484,
+          "step": 43
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7859227657318115 but got 2.784768581390381.\nAbsolute difference: 0.001154184341430664 (up to 2e-05 allowed)\nRelative difference: 0.00041429157894385516 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001154184341430664,
+          "step": 44
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7884957790374756 but got 2.7872109413146973.\nAbsolute difference: 0.0012848377227783203 (up to 2e-05 allowed)\nRelative difference: 0.00046076373234526347 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012848377227783203,
+          "step": 45
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7628893852233887 but got 2.7616491317749023.\nAbsolute difference: 0.0012402534484863281 (up to 2e-05 allowed)\nRelative difference: 0.0004488972505086553 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012402534484863281,
+          "step": 46
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7330493927001953 but got 2.7316641807556152.\nAbsolute difference: 0.0013852119445800781 (up to 2e-05 allowed)\nRelative difference: 0.0005068375084182133 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013852119445800781,
+          "step": 47
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.7172694206237793 but got 2.715972423553467.\nAbsolute difference: 0.0012969970703125 (up to 2e-05 allowed)\nRelative difference: 0.0004773163310448472 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012969970703125,
+          "step": 48
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.71889591217041 but got 2.7174582481384277.\nAbsolute difference: 0.0014376640319824219 (up to 2e-05 allowed)\nRelative difference: 0.0005287675874413226 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014376640319824219,
+          "step": 49
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.6945860385894775 but got 2.693222999572754.\nAbsolute difference: 0.0013630390167236328 (up to 2e-05 allowed)\nRelative difference: 0.0005058435682525604 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013630390167236328,
+          "step": 50
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.665066719055176 but got 2.6637520790100098.\nAbsolute difference: 0.0013146400451660156 (up to 2e-05 allowed)\nRelative difference: 0.0004932859788336121 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013146400451660156,
+          "step": 51
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.650505542755127 but got 2.6490910053253174.\nAbsolute difference: 0.0014145374298095703 (up to 2e-05 allowed)\nRelative difference: 0.0005336858976492454 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014145374298095703,
+          "step": 52
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.6520066261291504 but got 2.6506967544555664.\nAbsolute difference: 0.0013098716735839844 (up to 2e-05 allowed)\nRelative difference: 0.0004939171948811695 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013098716735839844,
+          "step": 53
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.6283764839172363 but got 2.627121686935425.\nAbsolute difference: 0.0012547969818115234 (up to 2e-05 allowed)\nRelative difference: 0.0004774038230403811 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012547969818115234,
+          "step": 54
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5996344089508057 but got 2.5982449054718018.\nAbsolute difference: 0.0013895034790039062 (up to 2e-05 allowed)\nRelative difference: 0.0005344995720243217 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013895034790039062,
+          "step": 55
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5863900184631348 but got 2.5849926471710205.\nAbsolute difference: 0.0013973712921142578 (up to 2e-05 allowed)\nRelative difference: 0.0005402786440324237 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013973712921142578,
+          "step": 56
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5878782272338867 but got 2.5864362716674805.\nAbsolute difference: 0.00144195556640625 (up to 2e-05 allowed)\nRelative difference: 0.0005571960655766703 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.00144195556640625,
+          "step": 57
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5654690265655518 but got 2.563932418823242.\nAbsolute difference: 0.0015366077423095703 (up to 2e-05 allowed)\nRelative difference: 0.0005989578226819055 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015366077423095703,
+          "step": 58
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.536832094192505 but got 2.535463809967041.\nAbsolute difference: 0.0013682842254638672 (up to 2e-05 allowed)\nRelative difference: 0.0005393672796068135 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013682842254638672,
+          "step": 59
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5247371196746826 but got 2.523310661315918.\nAbsolute difference: 0.0014264583587646484 (up to 2e-05 allowed)\nRelative difference: 0.0005649928254504574 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014264583587646484,
+          "step": 60
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5256993770599365 but got 2.524078369140625.\nAbsolute difference: 0.0016210079193115234 (up to 2e-05 allowed)\nRelative difference: 0.0006418055664243274 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016210079193115234,
+          "step": 61
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.5040459632873535 but got 2.5025603771209717.\nAbsolute difference: 0.001485586166381836 (up to 2e-05 allowed)\nRelative difference: 0.000593274320105344 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001485586166381836,
+          "step": 62
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.47628116607666 but got 2.4748268127441406.\nAbsolute difference: 0.0014543533325195312 (up to 2e-05 allowed)\nRelative difference: 0.0005873134894547381 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014543533325195312,
+          "step": 63
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.464627265930176 but got 2.4630661010742188.\nAbsolute difference: 0.0015611648559570312 (up to 2e-05 allowed)\nRelative difference: 0.0006334283798356956 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015611648559570312,
+          "step": 64
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.465487003326416 but got 2.4640913009643555.\nAbsolute difference: 0.0013957023620605469 (up to 2e-05 allowed)\nRelative difference: 0.0005660960127461536 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013957023620605469,
+          "step": 65
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.444732904434204 but got 2.4431512355804443.\nAbsolute difference: 0.0015816688537597656 (up to 2e-05 allowed)\nRelative difference: 0.0006469700026906696 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015816688537597656,
+          "step": 66
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.4171218872070312 but got 2.4157466888427734.\nAbsolute difference: 0.0013751983642578125 (up to 2e-05 allowed)\nRelative difference: 0.0005689404293330219 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0013751983642578125,
+          "step": 67
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.407136917114258 but got 2.405632734298706.\nAbsolute difference: 0.0015041828155517578 (up to 2e-05 allowed)\nRelative difference: 0.0006248846107827609 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015041828155517578,
+          "step": 68
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.4074854850769043 but got 2.4059414863586426.\nAbsolute difference: 0.0015439987182617188 (up to 2e-05 allowed)\nRelative difference: 0.000641332513874906 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015439987182617188,
+          "step": 69
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.387346029281616 but got 2.3858304023742676.\nAbsolute difference: 0.0015156269073486328 (up to 2e-05 allowed)\nRelative difference: 0.0006348584950647917 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015156269073486328,
+          "step": 70
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.3604726791381836 but got 2.359020233154297.\nAbsolute difference: 0.0014524459838867188 (up to 2e-05 allowed)\nRelative difference: 0.0006153199724459474 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014524459838867188,
+          "step": 71
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.3509361743927 but got 2.349344491958618.\nAbsolute difference: 0.0015916824340820312 (up to 2e-05 allowed)\nRelative difference: 0.0006770419594624677 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015916824340820312,
+          "step": 72
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.351195812225342 but got 2.3497467041015625.\nAbsolute difference: 0.0014491081237792969 (up to 2e-05 allowed)\nRelative difference: 0.0006163281323675701 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014491081237792969,
+          "step": 73
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.3322432041168213 but got 2.330577850341797.\nAbsolute difference: 0.001665353775024414 (up to 2e-05 allowed)\nRelative difference: 0.0007140566524472106 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001665353775024414,
+          "step": 74
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.305723190307617 but got 2.3042750358581543.\nAbsolute difference: 0.0014481544494628906 (up to 2e-05 allowed)\nRelative difference: 0.0006280695165622572 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014481544494628906,
+          "step": 75
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.296936511993408 but got 2.2953662872314453.\nAbsolute difference: 0.0015702247619628906 (up to 2e-05 allowed)\nRelative difference: 0.000683616962751906 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015702247619628906,
+          "step": 76
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.297086715698242 but got 2.2954816818237305.\nAbsolute difference: 0.0016050338745117188 (up to 2e-05 allowed)\nRelative difference: 0.0006987258528565556 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016050338745117188,
+          "step": 77
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.278567314147949 but got 2.2769675254821777.\nAbsolute difference: 0.0015997886657714844 (up to 2e-05 allowed)\nRelative difference: 0.0007021028765918692 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015997886657714844,
+          "step": 78
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.252656936645508 but got 2.251143455505371.\nAbsolute difference: 0.0015134811401367188 (up to 2e-05 allowed)\nRelative difference: 0.0006718649056213968 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015134811401367188,
+          "step": 79
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.2452688217163086 but got 2.243619441986084.\nAbsolute difference: 0.0016493797302246094 (up to 2e-05 allowed)\nRelative difference: 0.0007346023399388787 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016493797302246094,
+          "step": 80
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.244774341583252 but got 2.243112087249756.\nAbsolute difference: 0.0016622543334960938 (up to 2e-05 allowed)\nRelative difference: 0.0007404995249204855 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016622543334960938,
+          "step": 81
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.2271480560302734 but got 2.2256476879119873.\nAbsolute difference: 0.0015003681182861328 (up to 2e-05 allowed)\nRelative difference: 0.0006736723740587 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015003681182861328,
+          "step": 82
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.2013731002807617 but got 2.199850559234619.\nAbsolute difference: 0.0015225410461425781 (up to 2e-05 allowed)\nRelative difference: 0.0006916324388393745 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015225410461425781,
+          "step": 83
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1944069862365723 but got 2.192844867706299.\nAbsolute difference: 0.0015621185302734375 (up to 2e-05 allowed)\nRelative difference: 0.0007118636333511154 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015621185302734375,
+          "step": 84
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.194242477416992 but got 2.192643404006958.\nAbsolute difference: 0.0015990734100341797 (up to 2e-05 allowed)\nRelative difference: 0.0007287587522763525 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015990734100341797,
+          "step": 85
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.177274703979492 but got 2.1756458282470703.\nAbsolute difference: 0.001628875732421875 (up to 2e-05 allowed)\nRelative difference: 0.0007481259619857401 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001628875732421875,
+          "step": 86
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.151477098464966 but got 2.150068521499634.\nAbsolute difference: 0.0014085769653320312 (up to 2e-05 allowed)\nRelative difference: 0.0006547022816729128 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014085769653320312,
+          "step": 87
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.145678997039795 but got 2.1441407203674316.\nAbsolute difference: 0.0015382766723632812 (up to 2e-05 allowed)\nRelative difference: 0.0007169183621993349 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015382766723632812,
+          "step": 88
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1449880599975586 but got 2.1433544158935547.\nAbsolute difference: 0.0016336441040039062 (up to 2e-05 allowed)\nRelative difference: 0.0007616098823439444 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0016336441040039062,
+          "step": 89
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1287388801574707 but got 2.1273269653320312.\nAbsolute difference: 0.0014119148254394531 (up to 2e-05 allowed)\nRelative difference: 0.0006632635118380553 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014119148254394531,
+          "step": 90
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.1037096977233887 but got 2.1024293899536133.\nAbsolute difference: 0.0012803077697753906 (up to 2e-05 allowed)\nRelative difference: 0.0006085952691861075 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0012803077697753906,
+          "step": 91
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.09859037399292 but got 2.0971181392669678.\nAbsolute difference: 0.0014722347259521484 (up to 2e-05 allowed)\nRelative difference: 0.0007015350609614086 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014722347259521484,
+          "step": 92
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.097820997238159 but got 2.0963997840881348.\nAbsolute difference: 0.001421213150024414 (up to 2e-05 allowed)\nRelative difference: 0.0006774711245122828 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001421213150024414,
+          "step": 93
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0822410583496094 but got 2.0808091163635254.\nAbsolute difference: 0.0014319419860839844 (up to 2e-05 allowed)\nRelative difference: 0.0006876927050986815 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014319419860839844,
+          "step": 94
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0573058128356934 but got 2.055901527404785.\nAbsolute difference: 0.0014042854309082031 (up to 2e-05 allowed)\nRelative difference: 0.0006825846804819952 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014042854309082031,
+          "step": 95
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0529603958129883 but got 2.051539897918701.\nAbsolute difference: 0.0014204978942871094 (up to 2e-05 allowed)\nRelative difference: 0.0006919265939977284 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014204978942871094,
+          "step": 96
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0523195266723633 but got 2.050722122192383.\nAbsolute difference: 0.0015974044799804688 (up to 2e-05 allowed)\nRelative difference: 0.0007783410230328534 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0015974044799804688,
+          "step": 97
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.037290573120117 but got 2.035884380340576.\nAbsolute difference: 0.0014061927795410156 (up to 2e-05 allowed)\nRelative difference: 0.0006902269112193587 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.0014061927795410156,
+          "step": 98
+        },
+        {
+          "error": "Scalars are not close!\n\nExpected 2.0129292011260986 but got 2.011592388153076.\nAbsolute difference: 0.001336812973022461 (up to 2e-05 allowed)\nRelative difference: 0.0006641132595595532 (up to 0.0002 allowed)",
+          "max_absolute_error": 0.001336812973022461,
+          "step": 99
+        }
+      ],
+      "final_cycle_loss": 2.037434697151184,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": 16,
+      "initial_cycle_loss": 3.7106235027313232,
+      "loss_decreased": true,
+      "losses": [
+        3.7175774574279785,
+        3.7431321144104004,
+        3.709087371826172,
+        3.672697067260742,
+        3.637760639190674,
+        3.6431169509887695,
+        3.6025190353393555,
+        3.564870595932007,
+        3.5323283672332764,
+        3.5380687713623047,
+        3.5003106594085693,
+        3.464290142059326,
+        3.434173583984375,
+        3.439772844314575,
+        3.403817653656006,
+        3.3694539070129395,
+        3.341519355773926,
+        3.34675931930542,
+        3.312560558319092,
+        3.278593063354492,
+        3.2521719932556152,
+        3.256880283355713,
+        3.224287748336792,
+        3.1911745071411133,
+        3.1672682762145996,
+        3.1715617179870605,
+        3.1401896476745605,
+        3.1077325344085693,
+        3.085066795349121,
+        3.089083671569824,
+        3.0591673851013184,
+        3.0269861221313477,
+        3.005650758743286,
+        3.009429931640625,
+        2.9806721210479736,
+        2.9495418071746826,
+        2.9293055534362793,
+        2.9324121475219727,
+        2.9048070907592773,
+        2.8742892742156982,
+        2.8556036949157715,
+        2.858546733856201,
+        2.8320093154907227,
+        2.8019332885742188,
+        2.784768581390381,
+        2.7872109413146973,
+        2.7616491317749023,
+        2.7316641807556152,
+        2.715972423553467,
+        2.7174582481384277,
+        2.693222999572754,
+        2.6637520790100098,
+        2.6490910053253174,
+        2.6506967544555664,
+        2.627121686935425,
+        2.5982449054718018,
+        2.5849926471710205,
+        2.5864362716674805,
+        2.563932418823242,
+        2.535463809967041,
+        2.523310661315918,
+        2.524078369140625,
+        2.5025603771209717,
+        2.4748268127441406,
+        2.4630661010742188,
+        2.4640913009643555,
+        2.4431512355804443,
+        2.4157466888427734,
+        2.405632734298706,
+        2.4059414863586426,
+        2.3858304023742676,
+        2.359020233154297,
+        2.349344491958618,
+        2.3497467041015625,
+        2.330577850341797,
+        2.3042750358581543,
+        2.2953662872314453,
+        2.2954816818237305,
+        2.2769675254821777,
+        2.251143455505371,
+        2.243619441986084,
+        2.243112087249756,
+        2.2256476879119873,
+        2.199850559234619,
+        2.192844867706299,
+        2.192643404006958,
+        2.1756458282470703,
+        2.150068521499634,
+        2.1441407203674316,
+        2.1433544158935547,
+        2.1273269653320312,
+        2.1024293899536133,
+        2.0971181392669678,
+        2.0963997840881348,
+        2.0808091163635254,
+        2.055901527404785,
+        2.051539897918701,
+        2.050722122192383,
+        2.035884380340576,
+        2.011592388153076
+      ],
+      "max_absolute_error": 0.001665353775024414,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.000629425048828125,
+        "loss": 0.001665353775024414,
+        "updates": 1.2423843145370483e-05
+      },
+      "passed": false
+    },
+    "inductor_inplace_strict": {
+      "all_finite": true,
+      "failure_count": 0,
+      "failures": [],
+      "final_cycle_loss": 2.0388750433921814,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": null,
+      "initial_cycle_loss": 3.7107359170913696,
+      "loss_decreased": true,
+      "losses": [
+        3.7175660133361816,
+        3.7432096004486084,
+        3.709397077560425,
+        3.6727709770202637,
+        3.6379313468933105,
+        3.643484115600586,
+        3.602766513824463,
+        3.5650105476379395,
+        3.5325441360473633,
+        3.538412094116211,
+        3.5008037090301514,
+        3.4648420810699463,
+        3.434717893600464,
+        3.4403841495513916,
+        3.4044013023376465,
+        3.3699960708618164,
+        3.342219114303589,
+        3.347458839416504,
+        3.3131773471832275,
+        3.279216766357422,
+        3.2530226707458496,
+        3.2577834129333496,
+        3.2251546382904053,
+        3.1919705867767334,
+        3.1682944297790527,
+        3.172513008117676,
+        3.1412549018859863,
+        3.1085238456726074,
+        3.085956335067749,
+        3.090308666229248,
+        3.0601203441619873,
+        3.0280027389526367,
+        3.0067310333251953,
+        3.0107150077819824,
+        2.981781244277954,
+        2.950657606124878,
+        2.9304251670837402,
+        2.9337689876556396,
+        2.906079053878784,
+        2.875436305999756,
+        2.8567452430725098,
+        2.8597586154937744,
+        2.8332502841949463,
+        2.8031163215637207,
+        2.7859230041503906,
+        2.7884960174560547,
+        2.762890100479126,
+        2.7330493927001953,
+        2.7172694206237793,
+        2.71889591217041,
+        2.6945860385894775,
+        2.665066719055176,
+        2.650503158569336,
+        2.6520066261291504,
+        2.6283767223358154,
+        2.5996344089508057,
+        2.5863900184631348,
+        2.5878777503967285,
+        2.5654690265655518,
+        2.536832332611084,
+        2.5247371196746826,
+        2.5256998538970947,
+        2.5040459632873535,
+        2.4762814044952393,
+        2.464628219604492,
+        2.465487241744995,
+        2.444732666015625,
+        2.417118787765503,
+        2.4071383476257324,
+        2.407486915588379,
+        2.387346029281616,
+        2.3604726791381836,
+        2.3509361743927,
+        2.351195812225342,
+        2.3322432041168213,
+        2.3057243824005127,
+        2.296936511993408,
+        2.297086715698242,
+        2.278567314147949,
+        2.252656936645508,
+        2.2452709674835205,
+        2.244774341583252,
+        2.2271478176116943,
+        2.2013731002807617,
+        2.1944069862365723,
+        2.194247245788574,
+        2.177271842956543,
+        2.1514768600463867,
+        2.145683765411377,
+        2.144988536834717,
+        2.128739356994629,
+        2.1037094593048096,
+        2.09859037399292,
+        2.09782075881958,
+        2.0822408199310303,
+        2.0573062896728516,
+        2.0529603958129883,
+        2.0523197650909424,
+        2.037290573120117,
+        2.0129294395446777
+      ],
+      "max_absolute_error": 0.0001220703125,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.0001220703125,
+        "loss": 4.76837158203125e-06,
+        "updates": 2.1457672119140625e-06
+      },
+      "passed": true
+    },
+    "inductor_strict": {
+      "all_finite": true,
+      "failure_count": 0,
+      "failures": [],
+      "final_cycle_loss": 2.038870930671692,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": null,
+      "initial_cycle_loss": 3.710732400417328,
+      "loss_decreased": true,
+      "losses": [
+        3.7175660133361816,
+        3.743215560913086,
+        3.7093799114227295,
+        3.6727681159973145,
+        3.637939214706421,
+        3.643495798110962,
+        3.6027469635009766,
+        3.5650010108947754,
+        3.532581329345703,
+        3.538417339324951,
+        3.500789165496826,
+        3.4648361206054688,
+        3.434774875640869,
+        3.4403579235076904,
+        3.4043948650360107,
+        3.3699870109558105,
+        3.3422348499298096,
+        3.347460985183716,
+        3.313171148300171,
+        3.279193878173828,
+        3.253041982650757,
+        3.25777006149292,
+        3.225088596343994,
+        3.1919522285461426,
+        3.1683201789855957,
+        3.1724724769592285,
+        3.1412642002105713,
+        3.1085381507873535,
+        3.085977792739868,
+        3.0903127193450928,
+        3.06014347076416,
+        3.0279898643493652,
+        3.0067057609558105,
+        3.0107345581054688,
+        2.9817848205566406,
+        2.950613021850586,
+        2.9304592609405518,
+        2.9337077140808105,
+        2.906069278717041,
+        2.8754076957702637,
+        2.856795310974121,
+        2.859766960144043,
+        2.833230495452881,
+        2.8031091690063477,
+        2.785947799682617,
+        2.7885189056396484,
+        2.7629518508911133,
+        2.733064651489258,
+        2.7172961235046387,
+        2.7188720703125,
+        2.6945865154266357,
+        2.6651172637939453,
+        2.6505284309387207,
+        2.652008533477783,
+        2.6284210681915283,
+        2.599637985229492,
+        2.5863656997680664,
+        2.587841033935547,
+        2.5654544830322266,
+        2.536832571029663,
+        2.524724245071411,
+        2.525682210922241,
+        2.504054069519043,
+        2.476229190826416,
+        2.4646339416503906,
+        2.465524673461914,
+        2.444708824157715,
+        2.417120933532715,
+        2.4071128368377686,
+        2.4074747562408447,
+        2.387364387512207,
+        2.3604953289031982,
+        2.3509507179260254,
+        2.3511576652526855,
+        2.332212448120117,
+        2.30574893951416,
+        2.2969093322753906,
+        2.2970738410949707,
+        2.2785720825195312,
+        2.2526607513427734,
+        2.245267152786255,
+        2.2447822093963623,
+        2.22715425491333,
+        2.201341152191162,
+        2.194448471069336,
+        2.1943085193634033,
+        2.177281618118286,
+        2.151482582092285,
+        2.1456563472747803,
+        2.145024061203003,
+        2.1287388801574707,
+        2.1036810874938965,
+        2.0985844135284424,
+        2.0978448390960693,
+        2.0822219848632812,
+        2.0573084354400635,
+        2.052968978881836,
+        2.05230712890625,
+        2.037278652191162,
+        2.0129289627075195
+      ],
+      "max_absolute_error": 0.0002638474106788635,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.0002638474106788635,
+        "loss": 6.604194641113281e-05,
+        "updates": 3.043562173843384e-06
+      },
+      "passed": true
+    },
+    "loss_match": 0.0016815662384033203,
+    "mega_inplace": {
+      "all_finite": true,
+      "failure_count": 0,
+      "failures": [],
+      "final_cycle_loss": 2.038874924182892,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": null,
+      "initial_cycle_loss": 3.7107359766960144,
+      "loss_decreased": true,
+      "losses": [
+        3.7175660133361816,
+        3.7432098388671875,
+        3.709397077560425,
+        3.6727709770202637,
+        3.6379313468933105,
+        3.643484115600586,
+        3.602766513824463,
+        3.5650105476379395,
+        3.5325441360473633,
+        3.538412094116211,
+        3.5008039474487305,
+        3.4648420810699463,
+        3.434718132019043,
+        3.4403841495513916,
+        3.4044013023376465,
+        3.3699960708618164,
+        3.3422188758850098,
+        3.347459077835083,
+        3.3131773471832275,
+        3.279216766357422,
+        3.2530226707458496,
+        3.2577834129333496,
+        3.225154399871826,
+        3.1919705867767334,
+        3.1682944297790527,
+        3.172513008117676,
+        3.1412549018859863,
+        3.1085238456726074,
+        3.085956335067749,
+        3.0903091430664062,
+        3.0601203441619873,
+        3.0280027389526367,
+        3.0067312717437744,
+        3.010713577270508,
+        2.981781005859375,
+        2.9506564140319824,
+        2.9304208755493164,
+        2.9337689876556396,
+        2.906079053878784,
+        2.8754358291625977,
+        2.856743812561035,
+        2.8597583770751953,
+        2.8332505226135254,
+        2.8031158447265625,
+        2.7859230041503906,
+        2.7884957790374756,
+        2.7628893852233887,
+        2.7330496311187744,
+        2.7172694206237793,
+        2.7188961505889893,
+        2.6945862770080566,
+        2.665066719055176,
+        2.650505542755127,
+        2.6520066261291504,
+        2.6283764839172363,
+        2.5996346473693848,
+        2.5863900184631348,
+        2.5878779888153076,
+        2.5654690265655518,
+        2.536832332611084,
+        2.5247368812561035,
+        2.5256991386413574,
+        2.5040459632873535,
+        2.47628116607666,
+        2.464627265930176,
+        2.465487003326416,
+        2.444732904434204,
+        2.417121648788452,
+        2.4071366786956787,
+        2.4074854850769043,
+        2.387346029281616,
+        2.3604726791381836,
+        2.350935935974121,
+        2.351195812225342,
+        2.3322432041168213,
+        2.305723190307617,
+        2.296936511993408,
+        2.297086715698242,
+        2.278567314147949,
+        2.252656936645508,
+        2.2452688217163086,
+        2.244774341583252,
+        2.2271480560302734,
+        2.2013731002807617,
+        2.1944069862365723,
+        2.194242477416992,
+        2.177274703979492,
+        2.151477098464966,
+        2.145678997039795,
+        2.1449878215789795,
+        2.12873911857605,
+        2.1037096977233887,
+        2.09859037399292,
+        2.09782075881958,
+        2.0822408199310303,
+        2.0573060512542725,
+        2.0529603958129883,
+        2.0523195266723633,
+        2.037290573120117,
+        2.0129292011260986
+      ],
+      "max_absolute_error": 4.76837158203125e-07,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.0,
+        "loss": 4.76837158203125e-07,
+        "updates": 0.0
+      },
+      "passed": true
+    },
+    "megakernel": {
+      "all_finite": true,
+      "failure_count": 0,
+      "failures": [],
+      "final_cycle_loss": 2.038874924182892,
+      "final_parameter_norm": 48.73261260986328,
+      "first_failure_step": null,
+      "initial_cycle_loss": 3.7107359766960144,
+      "loss_decreased": true,
+      "losses": [
+        3.7175660133361816,
+        3.7432098388671875,
+        3.709397077560425,
+        3.6727709770202637,
+        3.6379313468933105,
+        3.643484115600586,
+        3.602766513824463,
+        3.5650105476379395,
+        3.5325441360473633,
+        3.538412094116211,
+        3.5008039474487305,
+        3.4648420810699463,
+        3.434718132019043,
+        3.4403841495513916,
+        3.4044013023376465,
+        3.3699960708618164,
+        3.3422188758850098,
+        3.347459077835083,
+        3.3131773471832275,
+        3.279216766357422,
+        3.2530226707458496,
+        3.2577834129333496,
+        3.225154399871826,
+        3.1919705867767334,
+        3.1682944297790527,
+        3.172513008117676,
+        3.1412549018859863,
+        3.1085238456726074,
+        3.085956335067749,
+        3.0903091430664062,
+        3.0601203441619873,
+        3.0280027389526367,
+        3.0067312717437744,
+        3.010713577270508,
+        2.981781005859375,
+        2.9506564140319824,
+        2.9304208755493164,
+        2.9337689876556396,
+        2.906079053878784,
+        2.8754358291625977,
+        2.856743812561035,
+        2.8597583770751953,
+        2.8332505226135254,
+        2.8031158447265625,
+        2.7859230041503906,
+        2.7884957790374756,
+        2.7628893852233887,
+        2.7330496311187744,
+        2.7172694206237793,
+        2.7188961505889893,
+        2.6945862770080566,
+        2.665066719055176,
+        2.650505542755127,
+        2.6520066261291504,
+        2.6283764839172363,
+        2.5996346473693848,
+        2.5863900184631348,
+        2.5878779888153076,
+        2.5654690265655518,
+        2.536832332611084,
+        2.5247368812561035,
+        2.5256991386413574,
+        2.5040459632873535,
+        2.47628116607666,
+        2.464627265930176,
+        2.465487003326416,
+        2.444732904434204,
+        2.417121648788452,
+        2.4071366786956787,
+        2.4074854850769043,
+        2.387346029281616,
+        2.3604726791381836,
+        2.350935935974121,
+        2.351195812225342,
+        2.3322432041168213,
+        2.305723190307617,
+        2.296936511993408,
+        2.297086715698242,
+        2.278567314147949,
+        2.252656936645508,
+        2.2452688217163086,
+        2.244774341583252,
+        2.2271480560302734,
+        2.2013731002807617,
+        2.1944069862365723,
+        2.194242477416992,
+        2.177274703979492,
+        2.151477098464966,
+        2.145678997039795,
+        2.1449878215789795,
+        2.12873911857605,
+        2.1037096977233887,
+        2.09859037399292,
+        2.09782075881958,
+        2.0822408199310303,
+        2.0573060512542725,
+        2.0529603958129883,
+        2.0523195266723633,
+        2.037290573120117,
+        2.0129292011260986
+      ],
+      "max_absolute_error": 4.76837158203125e-07,
+      "max_absolute_error_by_kind": {
+        "gradients": 0.0,
+        "loss": 4.76837158203125e-07,
+        "updates": 0.0
+      },
+      "passed": true
+    }
+  }
+}

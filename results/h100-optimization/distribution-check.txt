@@ -1,0 +1,7 @@
+trainkernel-0.2.0-py3-none-any.whl: PASSED
+trainkernel-0.2.0.tar.gz: PASSED
+
+Built with `python -m build` in an isolated environment and checked with
+`python -m twine check` on 2026-10-26.
+The wheel was installed into a clean virtual environment and imported as
+`trainkernel.__version__ == "0.2.0"`.

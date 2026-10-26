@@ -58,7 +58,7 @@ class GeneratedKernel:
 class _Generator:
     def __init__(self, program: Program, *, blocks_per_sm: int, fuse_pointwise: bool,
                  max_blocks: int | None = None, fuse_epilogues: bool = True,
-                 gemm_k_tile: int = 32, gemm_tile_n: int = 32, shared_skew: int = 0, split_k_gemv: bool = False, threads_per_block: int = 128, inline_input_casts: bool = True, inplace_outputs: dict[int, int] | None = None):
+                 gemm_k_tile: int = 32, gemm_tile_n: int = 32, shared_skew: int = 0, split_k_gemv: bool = False, threads_per_block: int = 128, inline_input_casts: bool = True, hopper_wgmma: bool = False, inplace_outputs: dict[int, int] | None = None):
         self.program = program
         self.blocks_per_sm = blocks_per_sm
         self.max_blocks = max_blocks
@@ -67,6 +67,7 @@ class _Generator:
         self.shared_skew = shared_skew
         self.split_k_gemv = split_k_gemv
         self.threads_per_block = threads_per_block
+        self.hopper_wgmma = hopper_wgmma
         self.inplace_outputs = dict(inplace_outputs or {})
         aliased_buffers = {program.outputs[i].buffer for i in self.inplace_outputs}
         self.producers = {op.output.buffer: op for op in program.operations}
@@ -544,6 +545,11 @@ class _Generator:
             self.tensor_core_count += 1
             cast = "__float2bfloat16_rn" if a.dtype == "bfloat16" else "__float2half_rn"
             typ = _DTYPES[a.dtype]
+            if self.hopper_wgmma and a.dtype == "bfloat16":
+                from .sm90 import emit_wgmma
+                return emit_wgmma(m, k, n, lambda r, q: self.read(a, (r, q)), lambda q, c: self.read(b, (q, c)),
+                                  lambda index, value: self.store_mm(op, index, value),
+                                  lambda index, value: epilogue(value, index)).source
             if self.gemm_tile_n == 64 and m >= 16 and n >= 64:
                 from .wmma import emit_wmma
                 return emit_wmma(m, k, n, lambda r, q: self.read(a, (r, q)), lambda q, c: self.read(b, (q, c)),
@@ -728,7 +734,10 @@ class _Generator:
                 elif a.shape[1] <= 8 or a.shape[0] <= 4:
                     work_blocks.append((numel(op.output.shape) + self.threads_per_block - 1) // self.threads_per_block)
                 else:
-                    tm, tn = ((32, 64) if self.gemm_tile_n == 64 and a.shape[0] >= 16 and b.shape[1] >= 64 else (16, 16) if a.shape[0] <= 16 and b.shape[1] <= 16 else (32, 32)) if a.dtype in {"float16", "bfloat16"} else (16, 8)
+                    if self.hopper_wgmma and a.dtype == "bfloat16":
+                        tm, tn = 64, 64
+                    else:
+                        tm, tn = ((32, 64) if self.gemm_tile_n == 64 and a.shape[0] >= 16 and b.shape[1] >= 64 else (16, 16) if a.shape[0] <= 16 and b.shape[1] <= 16 else (32, 32)) if a.dtype in {"float16", "bfloat16"} else (16, 8)
                     work_blocks.append(((a.shape[0] + tm - 1) // tm) * ((b.shape[1] + tn - 1) // tn))
             elif op.op in {"sum", "mean"}:
                 source = op.inputs[0]
@@ -738,7 +747,20 @@ class _Generator:
                 work_blocks.append(rows * min(256, (reduction_size + 511) // 512) if reduction_size > 4096 and rows <= 4 else (rows + self.threads_per_block - 1) // self.threads_per_block if reduction_size <= 128 and rows >= 8 else rows)
             else:
                 work_blocks.append((numel(op.output.shape) + self.threads_per_block - 1) // self.threads_per_block)
-        work_blocks.extend((numel(output.shape) + self.threads_per_block - 1) // self.threads_per_block for output in self.program.outputs)
+        if self.hopper_wgmma:
+            # Avoid inflating a Hopper tile grid for outputs already written
+            # directly by their producer. Preserve the established SM80 grid
+            # accounting on the default path.
+            for slot, output in enumerate(self.program.outputs):
+                direct = (slot in self.inplace_outputs and slot in self.direct_aliases) or (
+                    slot not in self.inplace_outputs
+                    and output.buffer in self.output_bindings
+                    and self.output_bindings[output.buffer][0] == slot
+                )
+                if not direct:
+                    work_blocks.append((numel(output.shape) + self.threads_per_block - 1) // self.threads_per_block)
+        else:
+            work_blocks.extend((numel(output.shape) + self.threads_per_block - 1) // self.threads_per_block for output in self.program.outputs)
         max_work_blocks = max(work_blocks)
         source = _CUDA_PREAMBLE.replace("@INPUT_COUNT@", str(max(1, len(self.program.inputs)))).replace("@OUTPUT_COUNT@", str(max(1, len(self.program.outputs))))
         source = source.replace("@SHARED_A@", str(max(1024, 32 * (self.gemm_k_tile + self.shared_skew)))).replace("@SHARED_B@", str(max(1024, self.gemm_k_tile * (32 + self.shared_skew), self.gemm_k_tile * 64 if self.gemm_tile_n == 64 else 0))).replace("@SHARED_C@", str(max(1024, 32 * (32 + self.shared_skew // 2), 2048 if self.gemm_tile_n == 64 else 0)))
@@ -748,7 +770,7 @@ class _Generator:
 
 def generate(program: Program, *, blocks_per_sm: int = 1, fuse_pointwise: bool = True,
              max_blocks: int | None = None, fuse_epilogues: bool = True,
-             gemm_k_tile: int = 32, gemm_tile_n: int = 32, shared_skew: int = 0, split_k_gemv: bool = False, threads_per_block: int = 128, inline_input_casts: bool = True, inplace_outputs: dict[int, int] | None = None) -> GeneratedKernel:
+             gemm_k_tile: int = 32, gemm_tile_n: int = 32, shared_skew: int = 0, split_k_gemv: bool = False, threads_per_block: int = 128, inline_input_casts: bool = True, hopper_wgmma: bool = False, inplace_outputs: dict[int, int] | None = None) -> GeneratedKernel:
     """Generate CUDA source without requiring a CUDA device or CUDA toolkit."""
     validate(program)
     from .passes import canonicalize_transposed_mm
@@ -766,6 +788,10 @@ def generate(program: Program, *, blocks_per_sm: int = 1, fuse_pointwise: bool =
         raise ValueError("trainkernel: shared_skew must be 0 or 16")
     if type(threads_per_block) is not int or threads_per_block not in {128, 256, 512, 1024}:
         raise ValueError("trainkernel: threads_per_block must be 128, 256, 512, or 1024")
+    if type(hopper_wgmma) is not bool:
+        raise ValueError("trainkernel: hopper_wgmma must be a boolean")
+    if hopper_wgmma and threads_per_block != 128:
+        raise ValueError("trainkernel: hopper_wgmma requires exactly 128 threads per block")
     if threads_per_block != 128:
         for op in program.operations:
             if op.op in {"mm", "addmm"}:
@@ -786,7 +812,7 @@ def generate(program: Program, *, blocks_per_sm: int = 1, fuse_pointwise: bool =
             raise ValueError("trainkernel: inplace outputs must be computed values, not input views")
     return _Generator(program, blocks_per_sm=blocks_per_sm, fuse_pointwise=fuse_pointwise,
                       max_blocks=max_blocks, fuse_epilogues=fuse_epilogues,
-                      gemm_k_tile=gemm_k_tile, gemm_tile_n=gemm_tile_n, shared_skew=shared_skew, split_k_gemv=split_k_gemv, threads_per_block=threads_per_block, inline_input_casts=inline_input_casts, inplace_outputs=mapping).generate()
+                      gemm_k_tile=gemm_k_tile, gemm_tile_n=gemm_tile_n, shared_skew=shared_skew, split_k_gemv=split_k_gemv, threads_per_block=threads_per_block, inline_input_casts=inline_input_casts, hopper_wgmma=hopper_wgmma, inplace_outputs=mapping).generate()
 
 
 _CUDA_PREAMBLE = r'''

@@ -216,6 +216,7 @@ def main(argv=None):
     parser.add_argument("--split-k-gemv", action="store_true")
     parser.add_argument("--threads-per-block", type=int, choices=(128,256,512,1024), default=128)
     parser.add_argument("--no-inline-input-casts", action="store_true")
+    parser.add_argument("--hopper-wgmma", action="store_true")
     args = parser.parse_args(argv)
     if any(value < 1 for value in (args.batch, args.input, args.hidden, args.output,
                                    args.batches, args.steps, args.trajectory_steps,
@@ -240,7 +241,7 @@ def main(argv=None):
             params = tuple(p.float() for p in bf_params)
             from trainkernel import compile as mk_compile
             compile_start = time.perf_counter()
-            compile_options = {"max_blocks": args.max_blocks, "blocks_per_sm": args.blocks_per_sm, "gemm_k_tile": args.gemm_k_tile, "gemm_tile_n": args.gemm_tile_n, "shared_skew": args.shared_skew, "split_k_gemv": args.split_k_gemv, "threads_per_block": args.threads_per_block, "inline_input_casts": not args.no_inline_input_casts}
+            compile_options = {"max_blocks": args.max_blocks, "blocks_per_sm": args.blocks_per_sm, "gemm_k_tile": args.gemm_k_tile, "gemm_tile_n": args.gemm_tile_n, "shared_skew": args.shared_skew, "split_k_gemv": args.split_k_gemv, "threads_per_block": args.threads_per_block, "inline_input_casts": not args.no_inline_input_casts, "hopper_wgmma": args.hopper_wgmma}
             mega = mk_compile(lambda p, x, y: step_master(p, x, y, 1e-3), (params, *batches[0]), **compile_options)
             mega_compile_seconds = time.perf_counter() - compile_start
             reference_loss, reference_grads, reference_updates = step_master(params, *batches[0], 1e-3)

@@ -1,0 +1,18 @@
+python: 3.12.3
+torch: 2.8.0+cu128
+torch_cuda: 12.8
+device: NVIDIA H100 80GB HBM3
+capability: (9, 0)
+sm_count: 132
+driver: 595.91.07
+memory: 81559 MiB
+nvcc: 12.8.93
+baseline_git: 2a1188bc9a7cf36ce434f616d663e55e42c48274
+optimization_branch_base_git: e3a4525
+benchmark_sha256: c6003c6135be433c445ded46de8e94eb81840d55dd1a35810b6cc280b97f549c
+codegen_sha256: b24a37ef49c946c303535a8b099c46cd32f3970e5a083bda19480b12324fed08
+sm90_sha256: 9736572cb085315ce845260e65df9564a69bc0d0bfb129bf2540d860a7bd7c3a
+
+The raw JSON files contain the complete benchmarked source hash set. Package
+version metadata was bumped from 0.1.0 to 0.2.0 after GPU timing; functional
+compiler and benchmark sources are unchanged.

@@ -22,6 +22,22 @@ These are complete forward, backward, and update steps captured as CUDA Graphs.
 The [held-out report](https://github.com/arpjw/trainkernel/blob/main/results/a100-optimization/README.md) publishes all seeds,
 raw timings, correctness checks, baseline failures, and the two regressions.
 
+The H100 validation keeps the same comparison policy and adds an
+architecture-specific launch calibration:
+
+| H100 workload | TrainKernel | Fastest measured Inductor | TrainKernel / Inductor |
+| --- | ---: | ---: | ---: |
+| tiny online MLP | 12.80 μs | 15.58 μs | **0.824, 1.21x faster** |
+| online MLP | 13.41 μs | 21.76 μs | **0.616, 1.62x faster** |
+| small MLP | 53.86 μs | 18.84 μs | 2.859, slower |
+| medium MLP | 191.09 μs | 30.58 μs | 6.257, slower |
+
+The [H100 report](https://github.com/arpjw/trainkernel/blob/main/results/h100-optimization/README.md)
+retains all 12 held-out runs, the classification-head validation, and rejected
+WGMMA experiments. An opt-in SM90a WGMMA backend is correct across tiles,
+tails, training trajectories, and graph replay, but it is slower on the tested
+small and medium workloads and is not the selected path.
+
 An independent release run adds a one-hot least-squares classification head.
 Across three seeds, TrainKernel's in-place path measured 13.07 us versus
 18.63 us for the fastest measured Inductor configuration at the median, or
@@ -49,7 +65,10 @@ python -m pytest -q
 python -m examples.online_training
 ```
 
-The backend targets SM80+, including A100 and H100. Release evidence is A100-only; H100 has not been tested and Hopper TMA/WGMMA paths are not implemented.
+The default backend targets SM80+, with measured A100 and H100 evidence. The
+experimental BF16 WGMMA path requires an H100-class compute capability 9.0 GPU,
+CUDA 12.8 in the validated environment, and explicit `hopper_wgmma=True`.
+Hopper TMA, warp specialization, and thread-block clusters are not implemented.
 
 ## Compile a training step
 
@@ -112,7 +131,7 @@ Temporary values use FP32 workspace storage with explicit rounding at low-precis
 
 ## Design and evidence
 
-See [compiler design](https://github.com/arpjw/trainkernel/blob/main/docs/design.md), [A100 optimization evidence](https://github.com/arpjw/trainkernel/blob/main/results/a100-optimization/README.md), [independent release validation](https://github.com/arpjw/trainkernel/blob/main/results/release-validation/README.md), and [GPU access record](https://github.com/arpjw/trainkernel/blob/main/docs/infrastructure.md). CPU tests validate IR semantics, views, reductions, diagnostics, and arena lifetimes. The independent release suite passed 116 tests that compile and execute generated CUDA, compare training outputs across precisions, and exercise CUDA Graph replay.
+See [compiler design](https://github.com/arpjw/trainkernel/blob/main/docs/design.md), [A100 optimization evidence](https://github.com/arpjw/trainkernel/blob/main/results/a100-optimization/README.md), [H100 evidence](https://github.com/arpjw/trainkernel/blob/main/results/h100-optimization/README.md), [independent release validation](https://github.com/arpjw/trainkernel/blob/main/results/release-validation/README.md), and [GPU access record](https://github.com/arpjw/trainkernel/blob/main/docs/infrastructure.md). CPU tests validate IR semantics, views, reductions, diagnostics, and arena lifetimes. GPU suites compile and execute generated CUDA, compare training outputs across precisions, and exercise CUDA Graph replay.
 
 ## Related work and roadmap
 

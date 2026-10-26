@@ -25,14 +25,33 @@ CUDA-event intervals. Setup amortization is reported separately and includes
 compilation plus graph capture. Cold and warm compiler-cache states must not be
 combined into a single deployment-cost claim.
 
+## Hopper optimization pass
+
+Launch and tile candidates are selected only on seed 20261025. The selected
+H100 SXM matrix keeps the existing tiny and online configurations, uses 132
+blocks with shared skew 16 for small, and uses 264 blocks at two blocks per SM
+with shared skew 16 for medium. Held-out seeds remain 101, 211, and 307.
+
+The opt-in `hopper_wgmma=True` path targets SM90a and BF16. It must pass exact
+tiles, irregular tails, multi-K accumulation, training trajectories, and CUDA
+Graph replay before timing is considered. Shared-source, grouped-K, and
+register-source-A schedules are compared only on the calibration seed. A
+Hopper-specific implementation is not selected merely because it is correct.
+The chosen public configuration must be the fastest validated candidate for
+the useful workload.
+
+Stage instrumentation changes generated code and is diagnostic only. It may
+locate bottlenecks but cannot support latency claims. Held-out claims use the
+uninstrumented paired CUDA-event harness.
+
 ## Interpretation
 
-Running the current WMMA/cooperative backend on H100 establishes portability
-only. It does not establish use of Hopper-specific WGMMA, Tensor Memory
-Accelerator, warp specialization, or thread-block-cluster features. Any speed
-comparison must retain the strongest measured Inductor result, even if a
-baseline fails the declared numerical tolerance; passing references are
-reported separately.
+Running the WMMA/cooperative backend on H100 establishes portability and a
+before-measurement. The experimental WGMMA path establishes correct SM90a
+execution, not a speedup. Tensor Memory Accelerator, warp specialization, and
+thread-block-cluster features remain unimplemented. Any speed comparison must
+retain the strongest measured Inductor result, even if a baseline fails the
+declared numerical tolerance; passing references are reported separately.
 
 The baseline is a gate for implementation work. A Hopper backend should first
 preserve the A100 correctness suite, then add architecture-specific kernels
