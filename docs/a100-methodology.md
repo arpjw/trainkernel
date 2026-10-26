@@ -47,12 +47,13 @@ medians. It reports ratios where values below 1.0 mean the numerator is
 faster. Confidence intervals describe variation in this run; they do not
 account for workload, driver, clock, or machine selection.
 
-The JSON also reports compilation amortization against the fastest
-correctness-passing reference. `break_even_steps` estimates the number of
-steady-state updates needed to recover compilation time from the per-step
-saving; it is null when the megakernel is slower or no passing reference is
-available. This is a single-run accounting estimate, not a deployment cost
-model.
+The JSON also reports setup amortization against the fastest
+correctness-passing reference. Setup includes compilation and CUDA Graph
+capture for both methods. `break_even_steps` estimates the number of
+steady-state updates needed to recover TrainKernel's incremental setup time
+from the per-step saving; it is zero when TrainKernel's measured setup is no
+slower, and null when its steady-state step is slower or no passing reference
+exists. This is a single-run accounting estimate, not a deployment cost model.
 
 ## Limits
 

@@ -2,12 +2,27 @@ import pytest
 import torch
 
 from benchmarks.train_loop import (
+    _amortization,
     _bootstrap_speedup_ci,
     _close_training,
     _trajectory,
     make_batches,
     step_master,
 )
+
+
+def test_amortization_includes_both_methods_setup_and_handles_no_win():
+    timings = {"mega": {"median_ms": 1.0}, "reference": {"median_ms": 2.0}}
+    compilation = {"mega": 2.0, "reference": 0.5}
+    capture = {"mega": 0.2, "reference": 0.1}
+    result = _amortization("mega", "reference", timings, compilation, capture)
+    assert result["incremental_setup_seconds"] == pytest.approx(1.6)
+    assert result["break_even_steps"] == pytest.approx(1600.0)
+
+    timings["mega"]["median_ms"] = 3.0
+    slower = _amortization("mega", "reference", timings, compilation, capture)
+    assert slower["break_even_steps"] is None
+    assert slower["break_even_defined"] is False
 
 
 def test_training_policy_checks_loss_dtype_and_all_outputs():

@@ -19,7 +19,7 @@ print("device:", torch.cuda.get_device_name())
 print("capability:", torch.cuda.get_device_capability())
 print("git:", subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip())
 PY
-nvidia-smi --query-gpu=name,uuid,driver_version --format=csv,noheader >> "$out_dir/environment.txt"
+nvidia-smi --query-gpu=name,driver_version --format=csv,noheader >> "$out_dir/environment.txt"
 nvcc --version >> "$out_dir/environment.txt"
 
 python -m pytest -q | tee "$out_dir/full-gpu-tests.txt"

@@ -1,11 +1,9 @@
 {
   "date_local": "2026-10-26 America/Los_Angeles",
-  "runpod_pod_id": "i49aq9zez15ek9",
   "runpod_region": "US-MD-1 Secure Cloud",
   "runpod_image": "runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404",
   "quoted_gpu_hourly_usd": 1.79,
   "gpu": "NVIDIA A100-SXM4-80GB",
-  "gpu_uuid": "GPU-54b3b2ae-5c0a-9c86-9d1f-61cba8800ec1",
   "compute_capability": "8.0",
   "driver": "595.91.07",
   "nvcc": "12.8.93",

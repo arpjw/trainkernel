@@ -176,6 +176,23 @@ def _bootstrap_speedup_ci(numerator, denominator, draws=2000, seed=0):
     return {"median_ratio": statistics.median(ratios), "ci95_ratio": [ratios[int(.025 * (draws - 1))], ratios[int(.975 * (draws - 1))]], "draws": draws, "seed": seed}
 
 
+def _amortization(name, reference, timings, compilation_seconds, capture_seconds):
+    setup_s = compilation_seconds[name] + capture_seconds[name]
+    reference_setup_s = compilation_seconds[reference] + capture_seconds[reference]
+    incremental_setup_s = setup_s - reference_setup_s
+    savings_ms = timings[reference]["median_ms"] - timings[name]["median_ms"]
+    return {
+        "reference": reference,
+        "setup_scope": "compilation plus CUDA Graph capture for both methods",
+        "setup_seconds": setup_s,
+        "reference_setup_seconds": reference_setup_s,
+        "incremental_setup_seconds": incremental_setup_s,
+        "steady_state_savings_ms_per_step": savings_ms,
+        "break_even_steps": (max(0.0, incremental_setup_s * 1000.0 / savings_ms) if savings_ms > 0 else None),
+        "break_even_defined": savings_ms > 0,
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch", type=int, default=128)
@@ -278,6 +295,7 @@ def main(argv=None):
             result["software"] = {"torch": torch.__version__, "cuda": torch.version.cuda}
             result["strict_inductor_options"] = strict_options
             result["trajectory"] = {}
+            result["capture_seconds"] = {}
             for name, method in methods.items():
                 try:
                     enforce = name.startswith("mega")
@@ -291,7 +309,11 @@ def main(argv=None):
                     if name.startswith("mega"):
                         raise
                 state = tuple(p.clone() for p in params)
+                torch.cuda.synchronize()
+                capture_start = time.perf_counter()
                 graph = _capture(method, state, batches, args.steps)
+                torch.cuda.synchronize()
+                result["capture_seconds"][name] = time.perf_counter() - capture_start
                 result.setdefault("graphs", {})[name] = {"graph": graph, "state": state}
             # Validate the captured state-feedback path independently from the
             # pure-call trajectory check. Reset is outside the replay timing.
@@ -329,17 +351,14 @@ def main(argv=None):
             result["bootstrap_vs_fastest_passing_reference"] = (_bootstrap_speedup_ci(result["timings"]["mega_inplace"]["raw_ms"], result["timings"][fastest_passing_reference]["raw_ms"]) if fastest_passing_reference else None)
             result["amortization"] = {}
             if fastest_passing_reference:
-                reference_ms = result["timings"][fastest_passing_reference]["median_ms"]
                 for name in ("megakernel", "mega_inplace"):
-                    compiler_s = result["compilation_seconds"].get(name, 0.0)
-                    savings_ms = reference_ms - result["timings"][name]["median_ms"]
-                    result["amortization"][name] = {
-                        "reference": fastest_passing_reference,
-                        "compile_seconds": compiler_s,
-                        "steady_state_savings_ms_per_step": savings_ms,
-                        "break_even_steps": (compiler_s * 1000.0 / savings_ms if savings_ms > 0 else None),
-                        "break_even_defined": savings_ms > 0,
-                    }
+                    result["amortization"][name] = _amortization(
+                        name,
+                        fastest_passing_reference,
+                        result["timings"],
+                        result["compilation_seconds"],
+                        result["capture_seconds"],
+                    )
             if "mega_inplace" in result["timings"] and fastest:
                 result["mega_inplace_bootstrap_vs_fastest_inductor"] = _bootstrap_speedup_ci(result["timings"]["mega_inplace"]["raw_ms"], result["timings"][fastest]["raw_ms"])
             result.pop("graphs")

@@ -30,10 +30,11 @@ python -m benchmarks.train_loop --task classification-head \
   --max-blocks 108 --samples 30 --json results/a100/classification-head.json
 ```
 
-The workload reports compile time, steady-state latency, and the estimated
-break-even update count for recovering compilation time against the fastest
-correctness-passing reference. It remains a synthetic SGD sanity check, not a
-claim about a production recommender or classifier.
+The workload reports compilation and CUDA Graph capture time, steady-state
+latency, and the estimated break-even update count for recovering incremental
+setup time against the fastest correctness-passing reference. It remains a
+synthetic SGD sanity check, not a claim about a production recommender or
+classifier.
 
 Example on a CUDA host:
 
