@@ -1,0 +1,19 @@
+Running tiny-online seed 101
+Running online seed 101
+Running small seed 101
+Running medium seed 101
+Running tiny-online seed 211
+Running online seed 211
+Running small seed 211
+Running medium seed 211
+Running tiny-online seed 307
+Running online seed 307
+Running small seed 307
+Running medium seed 307
+| Case | Mega in-place (μs) | Fastest Inductor (μs) | Eager graph (μs) | Mega/Inductor | Ratio range across seeds |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| tiny-online | 12.74 | 15.49 | 62.08 | 0.827 | 0.822–0.828 |
+| online | 13.29 | 21.56 | 65.49 | 0.616 | 0.616–0.617 |
+| small | 54.85 | 18.80 | 69.96 | 2.921 | 2.915–2.938 |
+| medium | 209.03 | 30.35 | 93.41 | 6.892 | 6.863–6.931 |
+Validated 12 complete runs with one source hash set.

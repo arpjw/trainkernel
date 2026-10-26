@@ -16,11 +16,26 @@ def test_wgmma_emission_metadata_and_protocol():
     assert out.tile_m == 64 and out.tile_n == 64 and out.tile_k == 16
     assert out.shared_a_elements == out.shared_b_elements == 1024
     assert out.source.count("wgmma.mma_async") == 2
-    assert "{%0,%1,%2,%3" in out.source
+    assert "%32, %33" in out.source
     assert "sm90_d[" not in out.source
     assert "fence.proxy.async.shared::cta" in out.source
     assert ", 0, 1, 1, 0, 0;" in out.source
     assert ", 1, 1, 1, 0, 0;" in out.source
+
+
+def test_wgmma_groups_k_chunks_before_wait():
+    grouped = emit_wgmma(64, 64, 64, _read_a, _read_b, _store, k_group_size=4)
+    ungrouped = emit_wgmma(64, 64, 64, _read_a, _read_b, _store, k_group_size=1)
+    assert grouped.source.count("wgmma.mma_async") == 4
+    assert grouped.source.count("wgmma.commit_group") == 1
+    assert ungrouped.source.count("wgmma.commit_group") == 4
+    assert grouped.shared_a_elements == grouped.shared_b_elements == 4096
+    assert ungrouped.shared_a_elements == ungrouped.shared_b_elements == 1024
+    assert '"l"(sm90_da0), "l"(sm90_db0)' in grouped.source
+    register = emit_wgmma(64, 64, 64, _read_a, _read_b, _store, register_source_a=True)
+    assert register.shared_a_elements == 0 and register.shared_b_elements == 1024
+    assert '"r"(sm90_ra00.u), "r"(sm90_ra01.u), "r"(sm90_ra02.u), "r"(sm90_ra03.u), "l"(sm90_db)' in register.source
+    assert "(16LL + int64_t((sm90_lane & 3) * 2))" in register.source
 
 
 def test_wgmma_emission_masks_tails_and_calls_callbacks():
@@ -40,6 +55,10 @@ def test_wgmma_rejects_nonpositive_dimensions():
         raise AssertionError("nonpositive dimensions must be rejected")
     with pytest.raises(ValueError, match="BF16"):
         emit_wgmma(64, 16, 64, _read_a, _read_b, _store, value_type="__half")
+    with pytest.raises(ValueError, match="k_group_size"):
+        emit_wgmma(64, 16, 64, _read_a, _read_b, _store, k_group_size=3)
+    with pytest.raises(ValueError, match="register_source_a"):
+        emit_wgmma(64, 16, 64, _read_a, _read_b, _store, register_source_a=1)
 
 
 def test_hopper_codegen_is_explicit_and_preserves_default_path():
@@ -50,6 +69,8 @@ def test_hopper_codegen_is_explicit_and_preserves_default_path():
     hopper = generate(program, hopper_wgmma=True)
     assert "wgmma.mma_async" not in baseline.source
     assert "wgmma.mma_async" in hopper.source
+    assert "unsigned short shared_a[1024]" in hopper.source
+    assert "unsigned short shared_b[1024]" in hopper.source
     assert hopper.tensor_core_operations == 1
     assert hopper.max_work_blocks == 1
     with pytest.raises(ValueError, match="boolean"):

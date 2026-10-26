@@ -30,6 +30,7 @@ def test_h100_summary_validates_and_reports_both_reference_columns(tmp_path, cap
     assert "Fastest all Inductor" in output
     assert "Fastest passing reference" in output
     assert "break-even" in output
+    assert "not cold/warm cache guarantees" in output
     assert "Validated 12 complete H100 runs" in output
 
 

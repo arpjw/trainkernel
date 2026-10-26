@@ -41,4 +41,4 @@ CUDA source is compiled through PyTorch's extension builder and cached using a s
 
 ## Limits and next experiments
 
-The cooperative schedule pays a growing cost on large matrix products, where cuBLAS and Inductor can use more specialized kernels. A future cost model could split large graphs, and a native-width temporary arena could reduce BF16 traffic. Hopper-specific pipelines require their own measurements. Neither path is part of this A100 result.
+The cooperative schedule pays a growing cost on large matrix products, where cuBLAS and Inductor can use more specialized kernels. A future cost model could split large graphs, and a native-width temporary arena could reduce BF16 traffic. The H100 pass added a measured opt-in SM90a WGMMA path, but the tested WGMMA schedules were slower than the selected WMMA path on small and medium training workloads. TMA and warp-specialized pipelines remain future work.

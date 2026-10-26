@@ -108,17 +108,24 @@ def main(argv: list[str] | None = None) -> int:
         median = lambda key: statistics.median(m[key] for m in measurements if m[key] is not None)
         ratios_all = [m["mega"] / m["all"] for m in measurements]
         ratios_passing = [m["mega"] / m["passing"] for m in measurements if m["passing"] is not None]
+        subsequent = measurements[1:]
+        subsequent_break_even = (
+            statistics.median(m["break_even"] for m in subsequent)
+            if subsequent and all(m["break_even"] is not None for m in subsequent) else None
+        )
         rows.append((case, median("mega") * 1000, median("all") * 1000, median("passing") * 1000 if ratios_passing else None,
-                     median("setup"), median("ref_setup"), median("break_even") if all(m["break_even"] is not None for m in measurements) else None,
+                     measurements[0]["setup"], statistics.median(m["setup"] for m in subsequent),
+                     measurements[0]["break_even"], subsequent_break_even,
                      statistics.median(ratios_all), min(ratios_all), max(ratios_all),
                      statistics.median(ratios_passing) if ratios_passing else None,
                      min(ratios_passing) if ratios_passing else None, max(ratios_passing) if ratios_passing else None))
-    print("| Case | Mega in-place (us) | Fastest all Inductor (us) | Fastest passing reference (us) | Mega/all-Inductor | All ratio range | Mega/passing reference | Passing ratio range | Median setup (s) | Median break-even steps |")
-    print("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+    print("| Case | Mega in-place (us) | Fastest all Inductor (us) | Fastest passing reference (us) | Mega/all-Inductor | All ratio range | Mega/passing reference | Passing ratio range | First observed setup (s) | Subsequent setup median (s) | First break-even steps | Subsequent break-even median |")
+    print("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
     for row in rows:
-        case, mega, all_inductor, passing, setup, _, break_even, ratio, low, high, ratio_p, low_p, high_p = row
+        case, mega, all_inductor, passing, first_setup, subsequent_setup, first_break_even, subsequent_break_even, ratio, low, high, ratio_p, low_p, high_p = row
         fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
-        print(f"| {case} | {mega:.2f} | {all_inductor:.2f} | {fmt(passing)} | {ratio:.3f} | {low:.3f}-{high:.3f} | {fmt(ratio_p)} | {fmt(low_p)}-{fmt(high_p)} | {setup:.2f} | {fmt(break_even)} |")
+        print(f"| {case} | {mega:.2f} | {all_inductor:.2f} | {fmt(passing)} | {ratio:.3f} | {low:.3f}-{high:.3f} | {fmt(ratio_p)} | {fmt(low_p)}-{fmt(high_p)} | {first_setup:.2f} | {subsequent_setup:.2f} | {fmt(first_break_even)} | {fmt(subsequent_break_even)} |")
+    print("Setup columns preserve run order. They are observed first/subsequent values, not cold/warm cache guarantees.")
     print(f"Validated {len(CASES) * len(SEEDS)} complete H100 runs with one source hash set.")
     return 0
 

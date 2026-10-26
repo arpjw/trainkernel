@@ -1,0 +1,102 @@
+{
+  "purpose": "exploratory H100 calibration, not held-out evidence",
+  "gpu_assumption": "H100 SXM with 132 SMs",
+  "hardware": {
+    "name": "NVIDIA H100 80GB HBM3",
+    "capability": [
+      9,
+      0
+    ],
+    "sm_count": 132
+  },
+  "case": "small",
+  "shape": [
+    32,
+    128,
+    256,
+    64
+  ],
+  "seed": 20261025,
+  "source_sha256": {
+    "trainkernel/__init__.py": "ab7467dee83509e0831cdde7c4e898c050714a3dfc56cb0ca9d1fed571980b09",
+    "trainkernel/codegen.py": "b24a37ef49c946c303535a8b099c46cd32f3970e5a083bda19480b12324fed08",
+    "trainkernel/frontend.py": "cde0b4e819a972505fe5e00bee48ac55b7df9141867a39a65405335e9e738445",
+    "trainkernel/gemv.py": "4f8ebaff4ec98f7b07f511a3fd7283f1962bfc01278b5409021e9411a8a09f77",
+    "trainkernel/ir.py": "82121c877c755d79e2e02e71a3d7caca105cc37b3e14a6e52951976b131c2e0f",
+    "trainkernel/passes.py": "a70dd5b4d788dc24b1500305a6038bd5c672de59551616b833cc87bc3622f4ab",
+    "trainkernel/reference.py": "f2a653caae8f631fd56829fac01673fd5dc0132d6ba67774b1a014cf21bc6b73",
+    "trainkernel/runtime.py": "52168d3ca934234100b6b20a5be70021980704f493d7f4ba3648b83512aef091",
+    "trainkernel/sm90.py": "f7bf42a2e4381038e88c2c44cce1c0b08b724db9a501c7261084900c4f0d01b3",
+    "trainkernel/wmma.py": "4d58c59f838c50111cff50bfec1711917bef8cf9a6a4b154b269ccb3e8bf3d16",
+    "benchmarks/train_loop.py": "c6003c6135be433c445ded46de8e94eb81840d55dd1a35810b6cc280b97f549c",
+    "scripts/tune_h100.py": "518f647515cbd9ce9c3ca7b6b3be390518ff0fa1a03c20b91702d93617581332"
+  },
+  "trials": [
+    {
+      "index": 7,
+      "compiler_options": {
+        "max_blocks": 132,
+        "threads_per_block": 128,
+        "hopper_wgmma": true
+      },
+      "compile_seconds": 33.71399703400675,
+      "resources": {
+        "registers_per_thread": 64,
+        "local_bytes_per_thread": 0,
+        "shared_bytes_per_block": 2560,
+        "resident_blocks_per_sm": 8
+      },
+      "cuda_sha256": "b13c54dce6733b6ff6843926cf3d57276b02ff9069116fd90944f583ce19d52d",
+      "trajectory": {
+        "passed": true,
+        "steps": 100,
+        "initial_loss": 4.528809547424316,
+        "final_loss": 2.0842385292053223
+      },
+      "replay_correctness": {
+        "passed": true
+      },
+      "timing": {
+        "median_ms": 0.10485039949417115,
+        "p10_ms": 0.10473120212554932,
+        "p90_ms": 0.10500320196151733,
+        "samples": 30,
+        "steps_per_replay": 20,
+        "raw_ms": [
+          0.10576800107955933,
+          0.10493279695510864,
+          0.10503360033035278,
+          0.10500320196151733,
+          0.10492479801177979,
+          0.10480959415435791,
+          0.10476000308990478,
+          0.10480320453643799,
+          0.10474239587783814,
+          0.10473120212554932,
+          0.10485759973526002,
+          0.10495359897613525,
+          0.10477279424667359,
+          0.1048624038696289,
+          0.10486559867858887,
+          0.10495519638061523,
+          0.10487680435180664,
+          0.10493439435958862,
+          0.10481760501861573,
+          0.10521279573440552,
+          0.10489120483398437,
+          0.10469119548797608,
+          0.10480159521102905,
+          0.10482879877090454,
+          0.10489599704742432,
+          0.10472960472106933,
+          0.10479680299758912,
+          0.10481599569320679,
+          0.10479520559310913,
+          0.10484319925308228
+        ]
+      },
+      "status": "ok"
+    }
+  ],
+  "best_index": 7
+}

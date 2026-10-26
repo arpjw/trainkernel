@@ -12,11 +12,14 @@ def test_sm90_probe_is_isolated_and_explicitly_sm90a():
     assert "-gencode=arch=compute_90a,code=sm_90a" in source
     assert 'TORCH_CUDA_ARCH_LIST"] = "9.0a"' in source
     assert "this probe requires H100 compute capability 9.0" in source
-    assert "not a performance benchmark" in source
+    assert "not end-to-end performance claims" in source
     assert "def run(seed: int = 0" in source
+    assert "probe_kernel_rs" in source
+    assert '"r"(a0), "r"(a1), "r"(a2), "r"(a3), "l"(db)' in source
 
 
 def test_sm90_probe_cli_parses_without_cuda_execution():
     source = SCRIPT.read_text()
     assert "--tolerance" in source
     assert "--seed" in source
+    assert "--timing-iterations" in source
