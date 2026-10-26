@@ -30,6 +30,15 @@ def test_teacher_targets_produce_finite_long_trajectory():
     assert all(torch.isfinite(torch.tensor(losses)))
 
 
+def test_classification_head_targets_are_one_hot_and_finite():
+    params, batches = make_batches(8, 6, 10, 4, torch.bfloat16, torch.device("cpu"), 3, seed=211, task="classification-head")
+    assert all(target.shape == (8, 4) for _, target in batches)
+    assert all(torch.equal(target.sum(dim=-1), torch.ones(8, dtype=torch.bfloat16)) for _, target in batches)
+    master = tuple(p.float() for p in params)
+    losses, _ = _trajectory(lambda p, x, y: step_master(p, x, y, 1e-3), master, batches, 20)
+    assert all(torch.isfinite(torch.tensor(losses)))
+
+
 def test_bootstrap_is_deterministic_and_lower_ratio_is_faster():
     a = [1.0, 1.1, 0.9, 1.05]
     b = [2.0, 2.1, 1.9, 2.05]

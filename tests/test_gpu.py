@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from benchmarks.train_mlp import compare, make_inputs, step, trajectory
-from megakernel import compile as mk_compile
+from trainkernel import compile as mk_compile
 
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="requires CUDA SM80+")
 

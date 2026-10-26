@@ -20,6 +20,21 @@ The predeclared workload set is: `tiny-online` (B4/I32/H64/O16), `online`
 (B128/I512/H1024/O256). Results should be collected for every workload rather
 than selecting only the fastest case.
 
+The same harness can model an online personalization or classification head by
+using one-hot teacher targets. This keeps the compiler contract unchanged while
+making the target semantics explicit:
+
+```bash
+python -m benchmarks.train_loop --task classification-head \
+  --batch 32 --input 128 --hidden 256 --output 16 \
+  --max-blocks 108 --samples 30 --json results/a100/classification-head.json
+```
+
+The workload reports compile time, steady-state latency, and the estimated
+break-even update count for recovering compilation time against the fastest
+correctness-passing reference. It remains a synthetic SGD sanity check, not a
+claim about a production recommender or classifier.
+
 Example on a CUDA host:
 
 ```bash

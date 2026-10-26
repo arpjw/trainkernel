@@ -48,7 +48,7 @@ def canonicalize_transposed_mm(program: Program) -> Program:
         # Transposing an operand of another rewritten GEMM creates this view.
         if value.shape==(m,n) and value.strides==(n,1) and value.offset==0:
             return replace(value,strides=(1,m))
-        raise ValueError('megakernel: unexpected view in transposed GEMM rewrite')
+        raise ValueError('trainkernel: unexpected view in transposed GEMM rewrite')
 
     operations=[]
     for op in program.operations:

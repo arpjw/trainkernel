@@ -1,1 +1,1 @@
-"""Benchmark entry points for megakernel."""
+"""Benchmark entry points for trainkernel."""

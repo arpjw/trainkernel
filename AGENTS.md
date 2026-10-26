@@ -1,4 +1,4 @@
-# Megakernel development
+# TrainKernel development
 
 - Experimental compiler research. Report measured results and limitations accurately.
 - Preserve user changes and Claude compatibility files.

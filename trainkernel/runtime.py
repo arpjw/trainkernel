@@ -43,16 +43,16 @@ class CompiledProgram:
 
     def _validate_inputs(self, inputs: tuple[torch.Tensor, ...]) -> None:
         if len(inputs) != len(self.program.inputs):
-            raise ValueError(f"megakernel: expected {len(self.program.inputs)} inputs, got {len(inputs)}")
+            raise ValueError(f"trainkernel: expected {len(self.program.inputs)} inputs, got {len(inputs)}")
         for i, (tensor, spec) in enumerate(zip(inputs, self.program.inputs)):
             if not isinstance(tensor, torch.Tensor):
-                raise TypeError(f"megakernel: input {i} must be a tensor")
+                raise TypeError(f"trainkernel: input {i} must be a tensor")
             if tensor.is_neg() or tensor.is_conj():
-                raise ValueError("megakernel: resolve lazy negative or conjugate input views before execution")
+                raise ValueError("trainkernel: resolve lazy negative or conjugate input views before execution")
             if tensor.device != self.device or tuple(tensor.shape) != spec.shape or tuple(tensor.stride()) != spec.strides or tensor.dtype != getattr(torch, spec.dtype):
-                raise ValueError(f"megakernel: input {i} does not match compiled device, shape, stride, or dtype")
+                raise ValueError(f"trainkernel: input {i} does not match compiled device, shape, stride, or dtype")
         if any(inputs[i].requires_grad for i in self.inplace_outputs.values()):
-            raise ValueError("megakernel: inplace targets must be detached from autograd")
+            raise ValueError("trainkernel: inplace targets must be detached from autograd")
 
     def allocate(self, *inputs: torch.Tensor) -> ExecutionBuffers:
         if self.inplace_outputs:
@@ -65,33 +65,33 @@ class CompiledProgram:
     def run_into(self, *inputs: torch.Tensor, buffers: ExecutionBuffers) -> tuple[torch.Tensor, ...]:
         self._validate_inputs(inputs)
         if len(buffers.outputs) != len(self.program.outputs):
-            raise ValueError("megakernel: incorrect output buffer count")
+            raise ValueError("trainkernel: incorrect output buffer count")
         if buffers.workspace.device != self.device or buffers.workspace.dtype != torch.float32 or not buffers.workspace.is_contiguous() or buffers.workspace.numel() < self.generated.workspace_elements:
-            raise ValueError("megakernel: workspace does not match compiled requirements")
+            raise ValueError("trainkernel: workspace does not match compiled requirements")
         # Caller buffers must be disjoint from each other and the inputs. A
         # conservative storage-level check prevents writes clobbering dependencies.
         output_storages = []
         allowed_storages = set()
         for slot, (out, spec) in enumerate(zip(buffers.outputs, self.program.outputs)):
             if out.device != self.device or out.dtype != getattr(torch, spec.dtype) or tuple(out.shape) != spec.shape or not out.is_contiguous():
-                raise ValueError("megakernel: output buffer does not match compiled requirements")
+                raise ValueError("trainkernel: output buffer does not match compiled requirements")
             if out.numel():
                 output_storages.append(out.untyped_storage().data_ptr())
             if slot in self.inplace_outputs:
                 target_index = self.inplace_outputs[slot]
                 target = inputs[target_index]
                 if out.data_ptr() != target.data_ptr() or tuple(out.stride()) != tuple(target.stride()):
-                    raise ValueError("megakernel: inplace output must bind its declared input")
+                    raise ValueError("trainkernel: inplace output must bind its declared input")
                 if target.numel():
                     storage = target.untyped_storage().data_ptr()
                     if any(i != target_index and value.numel() and value.untyped_storage().data_ptr() == storage for i, value in enumerate(inputs)):
-                        raise ValueError("megakernel: inplace target must not alias another input")
+                        raise ValueError("trainkernel: inplace target must not alias another input")
                     allowed_storages.add(storage)
         if buffers.workspace.numel():
             output_storages.append(buffers.workspace.untyped_storage().data_ptr())
         input_storages = {tensor.untyped_storage().data_ptr() for tensor in inputs if tensor.numel()}
         if len(set(output_storages)) != len(output_storages) or input_storages.intersection(output_storages) - allowed_storages:
-            raise ValueError("megakernel: execution buffers must not alias inputs or each other")
+            raise ValueError("trainkernel: execution buffers must not alias inputs or each other")
         self.module.launch(list(inputs), list(buffers.outputs), buffers.workspace)
         if self.inplace_outputs:
             torch.autograd.graph.increment_version([inputs[i] for i in self.inplace_outputs.values()])
@@ -105,24 +105,24 @@ def compile_program(program: Program, example_inputs: tuple[Any, ...] | list[Any
     """Compile for the current input device, requiring Linux, CUDA and SM80+."""
     flat, _ = tree_flatten(example_inputs)
     if not flat or any(not isinstance(x, torch.Tensor) for x in flat):
-        raise TypeError("megakernel: nonempty tensor inputs required")
+        raise TypeError("trainkernel: nonempty tensor inputs required")
     if len(flat) != len(program.inputs):
-        raise ValueError("megakernel: input count differs from the program signature")
+        raise ValueError("trainkernel: input count differs from the program signature")
     if not torch.cuda.is_available() or any(x.device.type != "cuda" for x in flat):
-        raise RuntimeError("megakernel: CUDA SM80+ GPU required; CPU IR inspection is available through capture()")
+        raise RuntimeError("trainkernel: CUDA SM80+ GPU required; CPU IR inspection is available through capture()")
     device = flat[0].device
     if any(x.device != device for x in flat):
-        raise ValueError("megakernel: all inputs must use the same CUDA device")
+        raise ValueError("trainkernel: all inputs must use the same CUDA device")
     capability = torch.cuda.get_device_capability(device)
     if capability < (8, 0):
-        raise RuntimeError("megakernel: NVIDIA compute capability 8.0 or newer required")
+        raise RuntimeError("trainkernel: NVIDIA compute capability 8.0 or newer required")
     generated = generate(program, blocks_per_sm=blocks_per_sm, max_blocks=max_blocks, fuse_pointwise=fuse_pointwise, fuse_epilogues=fuse_epilogues, gemm_k_tile=gemm_k_tile, gemm_tile_n=gemm_tile_n, shared_skew=shared_skew, split_k_gemv=split_k_gemv, threads_per_block=threads_per_block, inline_input_casts=inline_input_casts, inplace_outputs=inplace_outputs)
     if any(flat[i].requires_grad for i in (inplace_outputs or {}).values()):
-        raise ValueError("megakernel: inplace targets must be detached from autograd")
+        raise ValueError("trainkernel: inplace targets must be detached from autograd")
     from torch.utils.cpp_extension import CUDA_HOME, load_inline
     if CUDA_HOME is None:
-        raise RuntimeError("megakernel: CUDA toolkit with nvcc is required to compile generated kernels")
-    name = "megakernel_" + hashlib.sha256((generated.source + str(capability) + torch.__version__).encode()).hexdigest()[:20]
+        raise RuntimeError("trainkernel: CUDA toolkit with nvcc is required to compile generated kernels")
+    name = "trainkernel_" + hashlib.sha256((generated.source + str(capability) + torch.__version__).encode()).hexdigest()[:20]
     # Restrict compilation to the actual target rather than relying on a global
     # TORCH_CUDA_ARCH_LIST, which may target a different GPU or unsupported SM.
     arch = f"-gencode=arch=compute_{capability[0]}{capability[1]},code=sm_{capability[0]}{capability[1]}"

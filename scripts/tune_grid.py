@@ -6,7 +6,7 @@ from pathlib import Path
 import time
 import torch
 from benchmarks.train_mlp import make_inputs, step, compare, _capture, _measure
-from megakernel import compile as mk_compile
+from trainkernel import compile as mk_compile
 
 
 def main():

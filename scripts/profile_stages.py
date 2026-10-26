@@ -13,8 +13,8 @@ import statistics
 import torch
 from benchmarks.train_mlp import make_inputs, step, compare
 from benchmarks.train_loop import make_batches, step_master, _close_training
-import megakernel.runtime as runtime
-from megakernel import compile as mk_compile
+import trainkernel.runtime as runtime
+from trainkernel import compile as mk_compile
 
 
 def main():

@@ -1,4 +1,4 @@
-from megakernel.gemv import emit_gemv
+from trainkernel.gemv import emit_gemv
 import pytest
 import torch
 

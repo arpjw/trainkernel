@@ -1,4 +1,4 @@
-from megakernel.wmma import emit_wmma
+from trainkernel.wmma import emit_wmma
 import pytest
 import torch
 

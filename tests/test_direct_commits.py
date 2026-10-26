@@ -2,8 +2,8 @@
 import pytest
 import torch
 
-from megakernel import capture, compile as mk_compile
-from megakernel.codegen import generate
+from trainkernel import capture, compile as mk_compile
+from trainkernel.codegen import generate
 
 
 def _program(fn, inputs):

@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from benchmarks.train_loop import _capture, _close_training, _trajectory, make_batches, step, step_master
-from megakernel import compile as compile_megakernel
+from trainkernel import compile as compile_megakernel
 
 
 def test_stateful_sgd_trajectory_is_deterministic_cpu():

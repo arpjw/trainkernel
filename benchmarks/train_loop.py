@@ -47,7 +47,9 @@ def step_master(params, x, target, lr: float):
 
 def make_batches(batch: int, input_size: int, hidden: int, output: int,
                  dtype: torch.dtype, device: torch.device, count: int = 4,
-                 seed: int = 20261025):
+                 seed: int = 20261025, task: str = "regression"):
+    if task not in {"regression", "classification-head"}:
+        raise ValueError("task must be regression or classification-head")
     generator = torch.Generator(device="cpu").manual_seed(seed)
     def rand(shape):
         return torch.randn(shape, generator=generator, dtype=dtype).to(device)
@@ -61,6 +63,9 @@ def make_batches(batch: int, input_size: int, hidden: int, output: int,
         x = rand((batch, input_size))
         with torch.no_grad():
             target = torch.relu(x @ teacher[0] + teacher[1]) @ teacher[2] + teacher[3]
+            if task == "classification-head":
+                labels = target.argmax(dim=-1)
+                target = torch.nn.functional.one_hot(labels, num_classes=output).to(dtype)
         batches.append((x, target))
     return params, batches
 
@@ -116,7 +121,6 @@ def _trajectory(method, initial, batches, steps, *, enforce=True, report=False):
         loss_error = float((actual[0].float() - expected[0].float()).abs().max())
         gradient_errors = [float((a.float() - b.float()).abs().max()) for a, b in zip(actual[1], expected[1])]
         update_errors = [float((a.float() - b.float()).abs().max()) for a, b in zip(actual[2], expected[2])]
-        errors = [loss_error, *gradient_errors, *update_errors]
         max_errors["loss"] = max(max_errors["loss"], loss_error)
         max_errors["gradients"] = max(max_errors["gradients"], *gradient_errors)
         max_errors["updates"] = max(max_errors["updates"], *update_errors)
@@ -126,7 +130,7 @@ def _trajectory(method, initial, batches, steps, *, enforce=True, report=False):
         except AssertionError as exc:
             if enforce:
                 raise AssertionError(f"trajectory step {i}: {exc}") from exc
-            failures.append({"step": i, "error": str(exc), "max_absolute_error": max(errors)})
+            failures.append({"step": i, "error": str(exc), "max_absolute_error": max(loss_error, *gradient_errors, *update_errors)})
         losses.append(float(actual[0]))
         eager_state, actual_state = expected[2], actual[2]
     if report:
@@ -186,6 +190,7 @@ def main(argv=None):
     parser.add_argument("--json", type=Path)
     parser.add_argument("--seed", type=int, default=20261025)
     parser.add_argument("--inductor-mode", choices=("default", "reduce-overhead", "max-autotune-no-cudagraphs"), default="max-autotune-no-cudagraphs")
+    parser.add_argument("--task", choices=("regression", "classification-head"), default="regression")
     parser.add_argument("--max-blocks", type=int, default=108)
     parser.add_argument("--blocks-per-sm", type=int, default=1)
     parser.add_argument("--gemm-k-tile", type=int, choices=(16, 32), default=32)
@@ -201,6 +206,7 @@ def main(argv=None):
         parser.error("all sizes and iteration counts must be positive")
     config = {key: (str(value) if isinstance(value, Path) else value) for key, value in vars(args).items()}
     result = {"status": "pending", "config": config, "optimizer": "sgd",
+              "task": args.task,
               "numerical_policy": "FP32 master weights; BF16 compute casts; all losses, gradients, and updates checked",
               "numerical_tolerances": {"loss_fp32": {"rtol": 0.0002, "atol": 0.00002}, "gradients_bf16_compute": {"rtol": 0.04, "atol": 0.004}, "updates_fp32": {"rtol": 0.0002, "atol": 0.00002}}}
     if not torch.cuda.is_available():
@@ -212,9 +218,9 @@ def main(argv=None):
             torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction = False
             torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
             # Master state is FP32; activations and inputs are BF16.
-            bf_params, batches = make_batches(args.batch, args.input, args.hidden, args.output, torch.bfloat16, device, args.batches, args.seed)
+            bf_params, batches = make_batches(args.batch, args.input, args.hidden, args.output, torch.bfloat16, device, args.batches, args.seed, args.task)
             params = tuple(p.float() for p in bf_params)
-            from megakernel import compile as mk_compile
+            from trainkernel import compile as mk_compile
             compile_start = time.perf_counter()
             compile_options = {"max_blocks": args.max_blocks, "blocks_per_sm": args.blocks_per_sm, "gemm_k_tile": args.gemm_k_tile, "gemm_tile_n": args.gemm_tile_n, "shared_skew": args.shared_skew, "split_k_gemv": args.split_k_gemv, "threads_per_block": args.threads_per_block, "inline_input_casts": not args.no_inline_input_casts}
             mega = mk_compile(lambda p, x, y: step_master(p, x, y, 1e-3), (params, *batches[0]), **compile_options)
@@ -321,6 +327,19 @@ def main(argv=None):
             result["bootstrap_vs_fastest_all_inductor"] = _bootstrap_speedup_ci(result["timings"].get("mega_inplace", result["timings"]["megakernel"])["raw_ms"], result["timings"][all_inductor]["raw_ms"])
             result["bootstrap_vs_fastest_passing_inductor"] = (_bootstrap_speedup_ci(result["timings"].get("mega_inplace", result["timings"]["megakernel"])["raw_ms"], result["timings"][fastest]["raw_ms"]) if fastest else None)
             result["bootstrap_vs_fastest_passing_reference"] = (_bootstrap_speedup_ci(result["timings"]["mega_inplace"]["raw_ms"], result["timings"][fastest_passing_reference]["raw_ms"]) if fastest_passing_reference else None)
+            result["amortization"] = {}
+            if fastest_passing_reference:
+                reference_ms = result["timings"][fastest_passing_reference]["median_ms"]
+                for name in ("megakernel", "mega_inplace"):
+                    compiler_s = result["compilation_seconds"].get(name, 0.0)
+                    savings_ms = reference_ms - result["timings"][name]["median_ms"]
+                    result["amortization"][name] = {
+                        "reference": fastest_passing_reference,
+                        "compile_seconds": compiler_s,
+                        "steady_state_savings_ms_per_step": savings_ms,
+                        "break_even_steps": (compiler_s * 1000.0 / savings_ms if savings_ms > 0 else None),
+                        "break_even_defined": savings_ms > 0,
+                    }
             if "mega_inplace" in result["timings"] and fastest:
                 result["mega_inplace_bootstrap_vs_fastest_inductor"] = _bootstrap_speedup_ci(result["timings"]["mega_inplace"]["raw_ms"], result["timings"][fastest]["raw_ms"])
             result.pop("graphs")

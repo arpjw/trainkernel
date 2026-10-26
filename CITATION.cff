@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: If TrainKernel contributes to your work, please cite this repository and release.
+title: "TrainKernel: A static PyTorch training-step compiler for A100"
+type: software
+authors:
+  - family-names: Somu
+    given-names: Arya
+repository-code: https://github.com/arpjw/trainkernel
+url: https://github.com/arpjw/trainkernel
+version: 0.1.0
+date-released: 2026-10-26
+license: Apache-2.0
+keywords:
+  - PyTorch
+  - CUDA
+  - compiler
+  - training
+  - megakernel
+abstract: >-
+  TrainKernel compiles a supported static functional PyTorch training step,
+  including forward, loss, gradients, and SGD update, into one cooperative
+  CUDA kernel for NVIDIA SM80 GPUs.

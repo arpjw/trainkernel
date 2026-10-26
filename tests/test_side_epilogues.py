@@ -2,8 +2,8 @@
 import pytest
 import torch
 
-from megakernel import capture, compile
-from megakernel.codegen import generate, _Generator
+from trainkernel import capture, compile
+from trainkernel.codegen import generate, _Generator
 
 
 def test_shared_observable_root_and_update_are_discovered():

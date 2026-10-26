@@ -1,5 +1,5 @@
 import torch
-from megakernel import capture
+from trainkernel import capture
 
 def test_capture_mlp_forward_backwardish_ops():
     def fn(x, w, b):

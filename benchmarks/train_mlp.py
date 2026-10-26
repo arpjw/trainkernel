@@ -115,7 +115,7 @@ def main(argv=None):
         result.update(status="skipped", reason="CUDA unavailable")
     else:
         try:
-            from megakernel import compile as mk_compile
+            from trainkernel import compile as mk_compile
             device, dtype = torch.device("cuda", torch.cuda.current_device()), getattr(torch, args.dtype)
             torch.backends.cuda.matmul.allow_tf32 = False
             torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction = False

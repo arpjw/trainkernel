@@ -63,7 +63,7 @@ def main(argv=None):
         raw, batches = make_batches(args.batch, args.input, args.hidden, args.output, torch.bfloat16, device, 1, args.seed)
         initial = tuple(x.float() for x in raw)
         batch = batches[0]
-        from megakernel import compile as mk_compile
+        from trainkernel import compile as mk_compile
         options = {"max_blocks": args.maxblocks, "blocks_per_sm": args.blocks_per_sm, "threads_per_block": args.threads_per_block,
                    "split_k_gemv": args.split_k_gemv, "gemm_k_tile": args.gemm_k_tile, "gemm_tile_n": args.gemm_tile_n, "shared_skew": args.shared_skew}
         t0 = time.perf_counter(); mega = mk_compile(lambda q, x, y: step_master(q, x, y, 1e-3), (initial, *batch), inplace_outputs={5: 0, 6: 1, 7: 2, 8: 3}, **options); compile_s = time.perf_counter() - t0

@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible compiler, runtime, or correctness problem
+title: "[bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, private data, or unredacted infrastructure identifiers.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the expected and observed behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include a small self-contained PyTorch program when possible.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: TrainKernel, PyTorch, Python, CUDA toolkit, driver, and GPU versions.
+    validations:
+      required: true
+  - type: dropdown
+    id: correctness
+    attributes:
+      label: Does this affect numerical correctness?
+      options:
+        - "Yes"
+        - "No"
+        - "Unknown"
+    validations:
+      required: true

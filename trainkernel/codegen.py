@@ -27,7 +27,7 @@ def contiguous_strides(shape: tuple[int, ...]) -> tuple[int, ...]:
 def _literal(value: int | float) -> str:
     value = float(value)
     if not math.isfinite(value):
-        raise ValueError("megakernel: non-finite scalar constants are unsupported")
+        raise ValueError("trainkernel: non-finite scalar constants are unsupported")
     return f"{value:.17e}f"
 
 
@@ -38,7 +38,7 @@ def _round(expr: str, dtype: str) -> str:
         return f"__bfloat162float(__float2bfloat16_rn({expr}))"
     if dtype == "float16":
         return f"__half2float(__float2half_rn({expr}))"
-    raise ValueError(f"megakernel: unsupported CUDA dtype {dtype}")
+    raise ValueError(f"trainkernel: unsupported CUDA dtype {dtype}")
 
 
 @dataclass(frozen=True)
@@ -246,7 +246,7 @@ class _Generator:
             if producer is not None and producer.output.dtype == spec.dtype and spec.offset == 0 and numel(spec.shape) == numel(producer.output.shape) and all(dim == 1 or a == b for dim, a, b in zip(spec.shape, spec.strides, contiguous_strides(spec.shape))):
                 self.output_bindings.setdefault(spec.buffer, (index, spec.dtype))
         if not side_outputs.keys() <= self.output_bindings.keys():
-            raise ValueError("megakernel: side epilogues require direct output bindings")
+            raise ValueError("trainkernel: side epilogues require direct output bindings")
         self.native_regions: dict[str, tuple[int, int]] = {}
         for buffer in self.output_bindings:
             if buffer in self.alias_output_regions:
@@ -369,10 +369,10 @@ class _Generator:
             return self._epilogue_operand[1]
         coords = self.coords(output.shape, index)
         if len(operand.shape) > len(coords):
-            raise ValueError("megakernel: invalid broadcast rank")
+            raise ValueError("trainkernel: invalid broadcast rank")
         trailing = coords[len(coords) - len(operand.shape):] if operand.shape else ()
         if any(a != 1 and a != b for a, b in zip(operand.shape, output.shape[-len(operand.shape):] if operand.shape else ())):
-            raise ValueError("megakernel: incompatible broadcast dimensions")
+            raise ValueError("trainkernel: incompatible broadcast dimensions")
         return self.read(operand, tuple("0" if dim == 1 else c for dim, c in zip(operand.shape, trailing)))
 
     def point_expr(self, op: Operation, index: str) -> str:
@@ -390,7 +390,7 @@ class _Generator:
         if op.op == "pow":
             exponent = op.inputs[1] if len(op.inputs) > 1 else op.attrs.get("exponent", 2)
             if not isinstance(exponent, (float, int)):
-                raise ValueError("megakernel: pow exponent must be a scalar")
+                raise ValueError("trainkernel: pow exponent must be a scalar")
             if exponent == 2:
                 return f"mk_square({values[0]})"
             return f"powf({values[0]}, {_literal(exponent)})"
@@ -400,7 +400,7 @@ class _Generator:
             return _literal(op.attrs.get("value", op.inputs[0] if op.inputs else 0))
         if op.op == "cast":
             return values[0]
-        raise ValueError(f"megakernel: unsupported pointwise operation {op.op}")
+        raise ValueError(f"trainkernel: unsupported pointwise operation {op.op}")
 
     def epilogue_expr(self, buffer: str, value: str, index: str) -> str:
         record = self.epilogues.get(buffer)
@@ -442,7 +442,7 @@ class _Generator:
     def emit_reduction(self, op: Operation) -> str:
         source = op.inputs[0]
         if not isinstance(source, TensorSpec):
-            raise ValueError("megakernel: reduction requires a tensor")
+            raise ValueError("trainkernel: reduction requires a tensor")
         dims = tuple(int(d) % len(source.shape) for d in op.attrs.get("dims", tuple(range(len(source.shape))))) if source.shape else ()
         dims = tuple(sorted(set(dims)))
         kept = [d for d in range(len(source.shape)) if d not in dims]
@@ -458,7 +458,7 @@ class _Generator:
         value = self.read(source, tuple(coordinates))
         size = numel(reduced_shape)
         if numel(op.output.shape) != numel(kept_shape):
-            raise ValueError("megakernel: reduction output shape does not match its axes")
+            raise ValueError("trainkernel: reduction output shape does not match its axes")
         if size > 4096 and numel(op.output.shape) <= 4:
             parts = min(256, (size + 511) // 512)
             rows = numel(op.output.shape)
@@ -505,11 +505,11 @@ class _Generator:
     def emit_mm(self, op: Operation) -> str:
         a, b = op.inputs[1:3] if op.op == "addmm" else op.inputs[:2]
         if not isinstance(a, TensorSpec) or not isinstance(b, TensorSpec) or len(a.shape) != 2 or len(b.shape) != 2 or a.shape[1] != b.shape[0]:
-            raise ValueError("megakernel: mm requires compatible rank-two tensors")
+            raise ValueError("trainkernel: mm requires compatible rank-two tensors")
         m, k = a.shape
         _, n = b.shape
         if op.output.shape != (m, n):
-            raise ValueError("megakernel: matrix output shape does not match its inputs")
+            raise ValueError("trainkernel: matrix output shape does not match its inputs")
         def epilogue(acc: str, index: str) -> str:
             if op.op != "addmm":
                 return acc
@@ -642,11 +642,11 @@ class _Generator:
     def generate(self) -> GeneratedKernel:
         for spec in (*self.program.inputs, *(op.output for op in self.program.operations), *self.program.outputs):
             if spec.dtype not in _DTYPES:
-                raise ValueError(f"megakernel: unsupported CUDA dtype {spec.dtype}")
+                raise ValueError(f"trainkernel: unsupported CUDA dtype {spec.dtype}")
             if any(d < 0 for d in spec.shape) or len(spec.shape) != len(spec.strides) or any(s < 0 for s in spec.strides):
-                raise ValueError("megakernel: invalid static shape or stride")
+                raise ValueError("trainkernel: invalid static shape or stride")
             if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", spec.buffer):
-                raise ValueError("megakernel: invalid buffer identifier")
+                raise ValueError("trainkernel: invalid buffer identifier")
         statements = []
         stage_reads: list[tuple[int, int]] = []
         stage_writes: list[tuple[int, int]] = []
@@ -669,7 +669,7 @@ class _Generator:
             if op.output.strides != contiguous_strides(op.output.shape):
                 # Size-one dimensions may have arbitrary equivalent strides.
                 if any(n > 1 and a != b for n, a, b in zip(op.output.shape, op.output.strides, contiguous_strides(op.output.shape))):
-                    raise ValueError(f"megakernel: materialized output must be contiguous: {op.name}")
+                    raise ValueError(f"trainkernel: materialized output must be contiguous: {op.name}")
             if op.op in {"mm", "addmm"}:
                 code = self.emit_mm(op)
             elif op.op in {"sum", "mean"}:
@@ -677,7 +677,7 @@ class _Generator:
             elif op.op in _POINTWISE:
                 code = self.emit_pointwise(op)
             else:
-                raise ValueError(f"megakernel: unsupported CUDA operation {op.op}")
+                raise ValueError(f"trainkernel: unsupported CUDA operation {op.op}")
             reads = [region for value in op.inputs if isinstance(value, TensorSpec) for region in read_regions(value)]
             start = self.offsets[op.output.buffer]
             write = self.native_regions.get(op.output.buffer, (start, start + numel(op.output.shape)))
@@ -755,35 +755,35 @@ def generate(program: Program, *, blocks_per_sm: int = 1, fuse_pointwise: bool =
     program = canonicalize_transposed_mm(program)
     validate(program)
     if type(blocks_per_sm) is not int or blocks_per_sm < 1 or blocks_per_sm > 8:
-        raise ValueError("megakernel: blocks_per_sm must be between 1 and 8")
+        raise ValueError("trainkernel: blocks_per_sm must be between 1 and 8")
     if max_blocks is not None and (type(max_blocks) is not int or max_blocks < 1):
-        raise ValueError("megakernel: max_blocks must be positive when provided")
+        raise ValueError("trainkernel: max_blocks must be positive when provided")
     if type(gemm_k_tile) is not int or gemm_k_tile not in {16, 32}:
-        raise ValueError("megakernel: gemm_k_tile must be 16 or 32")
+        raise ValueError("trainkernel: gemm_k_tile must be 16 or 32")
     if type(gemm_tile_n) is not int or gemm_tile_n not in {32, 64}:
-        raise ValueError("megakernel: gemm_tile_n must be 32 or 64")
+        raise ValueError("trainkernel: gemm_tile_n must be 32 or 64")
     if type(shared_skew) is not int or shared_skew not in {0, 16}:
-        raise ValueError("megakernel: shared_skew must be 0 or 16")
+        raise ValueError("trainkernel: shared_skew must be 0 or 16")
     if type(threads_per_block) is not int or threads_per_block not in {128, 256, 512, 1024}:
-        raise ValueError("megakernel: threads_per_block must be 128, 256, 512, or 1024")
+        raise ValueError("trainkernel: threads_per_block must be 128, 256, 512, or 1024")
     if threads_per_block != 128:
         for op in program.operations:
             if op.op in {"mm", "addmm"}:
                 a = op.inputs[1] if op.op == "addmm" else op.inputs[0]
                 if a.shape[0] > 4 and a.shape[1] > 8:
-                    raise ValueError("megakernel: larger blocks require direct SIMT/GEMV matrix paths")
+                    raise ValueError("trainkernel: larger blocks require direct SIMT/GEMV matrix paths")
     mapping = dict(inplace_outputs or {})
     if any(type(i) is not int or type(j) is not int or not 0 <= i < len(program.outputs) or not 0 <= j < len(program.inputs) for i, j in mapping.items()):
-        raise ValueError("megakernel: invalid inplace output/input index")
+        raise ValueError("trainkernel: invalid inplace output/input index")
     if len(set(mapping.values())) != len(mapping):
-        raise ValueError("megakernel: inplace outputs must target distinct inputs")
+        raise ValueError("trainkernel: inplace outputs must target distinct inputs")
     produced = {op.output.buffer for op in program.operations}
     for slot, target in mapping.items():
         output, input_spec = program.outputs[slot], program.inputs[target]
         if output.shape != input_spec.shape or output.dtype != input_spec.dtype or input_spec.strides != contiguous_strides(input_spec.shape):
-            raise ValueError("megakernel: inplace output must match a contiguous input shape and dtype")
+            raise ValueError("trainkernel: inplace output must match a contiguous input shape and dtype")
         if output.buffer not in produced:
-            raise ValueError("megakernel: inplace outputs must be computed values, not input views")
+            raise ValueError("trainkernel: inplace outputs must be computed values, not input views")
     return _Generator(program, blocks_per_sm=blocks_per_sm, fuse_pointwise=fuse_pointwise,
                       max_blocks=max_blocks, fuse_epilogues=fuse_epilogues,
                       gemm_k_tile=gemm_k_tile, gemm_tile_n=gemm_tile_n, shared_skew=shared_skew, split_k_gemv=split_k_gemv, threads_per_block=threads_per_block, inline_input_casts=inline_input_casts, inplace_outputs=mapping).generate()

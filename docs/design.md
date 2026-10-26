@@ -1,5 +1,18 @@
 # Compiler design
 
+```mermaid
+flowchart LR
+    A[Functional PyTorch training step] --> B[Fake tensor FX capture]
+    B --> C[Static TrainKernel IR]
+    C --> D[Alias and lifetime analysis]
+    D --> E[Stage and barrier scheduler]
+    E --> F[CUDA source generation]
+    F --> G[PyTorch extension build]
+    G --> H[CompiledTrainingStep]
+    H --> I[One cooperative kernel]
+    H --> J[Optional CUDA Graph capture]
+```
+
 ## Capture
 
 `capture()` flattens the input pytree and uses functionalization plus fake-mode FX tracing to obtain an ATen graph without applying updates to example inputs. `compile_training()` adds a checked contract for `(state, *data) -> (loss, gradients, updated_state)` and derives the state mapping from the returned tree. PyTorch supplies differentiation when the function contains `torch.func.grad_and_value`. The compiler lowers supported operations into a small SSA representation with explicit tensor shape, dtype, root buffer, offset, and strides.

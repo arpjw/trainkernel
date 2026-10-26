@@ -1,0 +1,26 @@
+name: Feature request
+description: Propose a supported operation, workload, or compiler improvement
+title: "[request] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: Describe the training workload and why a whole-step kernel helps.
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: PyTorch contract
+      description: List shapes, dtypes, operations, optimizer, and target GPU.
+    validations:
+      required: true
+  - type: textarea
+    id: baseline
+    attributes:
+      label: Comparison baseline
+      description: Explain how correctness and performance should be compared.
+    validations:
+      required: true

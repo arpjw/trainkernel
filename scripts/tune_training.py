@@ -8,7 +8,7 @@ import time
 import traceback
 import torch
 from benchmarks.train_loop import make_batches, step_master, _trajectory, _capture, _close, _paired_time
-from megakernel import compile as mk_compile
+from trainkernel import compile as mk_compile
 
 CASES = {'tiny-online': (4,32,64,16), 'online': (1,128,128,16), 'small': (32,128,256,64), 'medium': (128,512,1024,256)}
 CONFIGS = {

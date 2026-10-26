@@ -3,13 +3,19 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import torch
 from torch.utils._pytree import TreeSpec, tree_flatten, tree_unflatten
 
 from .codegen import contiguous_strides
 from .ir import Operation, Program, TensorSpec
+
+if TYPE_CHECKING:
+    from .runtime import CompiledProgram
+
+
+OutputT = TypeVar("OutputT")
 
 _DTYPES = {torch.float32: "float32", torch.float16: "float16", torch.bfloat16: "bfloat16"}
 _VIEWS = {"aten.alias.default", "aten.detach.default", "aten.t.default", "aten.transpose.int", "aten.permute.default", "aten.view.default", "aten._unsafe_view.default", "aten.reshape.default", "aten.expand.default", "aten.squeeze.default", "aten.squeeze.dim", "aten.unsqueeze.default"}
@@ -30,14 +36,76 @@ class CapturedProgram:
         return self.outputs
 
 
+class CompiledFunction(Generic[OutputT]):
+    """A callable, inspectable specialization of a static PyTorch function."""
+
+    def __init__(
+        self,
+        program: Program,
+        runner: CompiledProgram,
+        input_spec: TreeSpec,
+        output_spec: TreeSpec,
+    ) -> None:
+        self.program = program
+        self.runner = runner
+        self.input_spec = input_spec
+        self.output_spec = output_spec
+
+    @property
+    def source(self) -> str:
+        """Generated CUDA source for inspection and reproducibility."""
+        return self.runner.source
+
+    def _flatten_inputs(self, args: tuple[Any, ...]) -> tuple[torch.Tensor, ...]:
+        flat, actual_spec = tree_flatten(args)
+        if actual_spec != self.input_spec:
+            raise ValueError("trainkernel: runtime input pytree differs from the compiled signature")
+        return tuple(flat)
+
+    def __call__(self, *args: Any) -> OutputT:
+        flat = self._flatten_inputs(args)
+        return tree_unflatten(list(self.runner(*flat)), self.output_spec)
+
+    def capture(self, *args: Any, warmup: int = 3) -> CapturedProgram:
+        """Capture this specialization as a reusable, state-safe CUDA Graph."""
+        if type(warmup) is not int or warmup < 1:
+            raise ValueError("trainkernel: graph warmup must be positive")
+        flat = self._flatten_inputs(args)
+        self.runner._validate_inputs(flat)
+        with torch.cuda.device(self.runner.device):
+            saved = {i: flat[i].clone() for i in self.runner.inplace_outputs.values()}
+            try:
+                for _ in range(warmup):
+                    self(*args)
+                torch.cuda.synchronize(self.runner.device)
+            finally:
+                for i, original in saved.items():
+                    flat[i].copy_(original)
+            torch.cuda.synchronize(self.runner.device)
+            graph = torch.cuda.CUDAGraph()
+            try:
+                with torch.cuda.graph(graph):
+                    outputs = self(*args)
+            finally:
+                for i, original in saved.items():
+                    flat[i].copy_(original)
+                torch.cuda.synchronize(self.runner.device)
+        # Keep immutable leaf references even if callers later edit a dict/list.
+        return CapturedProgram(graph, args, outputs, flat)
+
+
+class CompiledTrainingStep(CompiledFunction[OutputT]):
+    """A compiled `(state, *data) -> (loss, gradients, updated_state)` step."""
+
+
 def _metadata(node: torch.fx.Node) -> tuple[tuple[int, ...], str]:
     value = node.meta.get("val")
     if not isinstance(value, torch.Tensor):
-        raise ValueError(f"megakernel: missing tensor metadata for {node.name}")
+        raise ValueError(f"trainkernel: missing tensor metadata for {node.name}")
     if value.dtype not in _DTYPES:
-        raise ValueError(f"megakernel: unsupported dtype {value.dtype} at {node.name}")
+        raise ValueError(f"trainkernel: unsupported dtype {value.dtype} at {node.name}")
     if any(not isinstance(dim, int) for dim in value.shape):
-        raise ValueError("megakernel: dynamic shapes are unsupported")
+        raise ValueError("trainkernel: dynamic shapes are unsupported")
     return tuple(value.shape), _DTYPES[value.dtype]
 
 
@@ -65,7 +133,7 @@ def _view(node: torch.fx.Node, root: TensorSpec, shape: tuple[int, ...], dtype: 
             meta = torch.empty_strided(root.shape, root.strides, device="meta")
             strides = tuple(meta.view(shape).stride())
         except RuntimeError as exc:
-            raise ValueError(f"megakernel: {target} requires a contiguous copy; use .contiguous() before reshaping") from exc
+            raise ValueError(f"trainkernel: {target} requires a contiguous copy; use .contiguous() before reshaping") from exc
     return TensorSpec(node.name, shape, dtype, strides, root.buffer, root.offset)
 
 
@@ -78,15 +146,15 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
     """
     flat_inputs, input_spec = tree_flatten(tuple(example_inputs))
     if not flat_inputs or any(not isinstance(x, torch.Tensor) for x in flat_inputs):
-        raise TypeError("megakernel: example_inputs must contain tensors only and cannot be empty")
+        raise TypeError("trainkernel: example_inputs must contain tensors only and cannot be empty")
     if any(x.dtype not in _DTYPES for x in flat_inputs):
-        raise ValueError("megakernel: unsupported dtype; expected float32, float16, or bfloat16")
+        raise ValueError("trainkernel: unsupported dtype; expected float32, float16, or bfloat16")
     if any(x.layout != torch.strided for x in flat_inputs):
-        raise ValueError("megakernel: only strided tensors are supported")
+        raise ValueError("trainkernel: only strided tensors are supported")
     if any(x.device != flat_inputs[0].device for x in flat_inputs):
-        raise ValueError("megakernel: inputs must use one device")
+        raise ValueError("trainkernel: inputs must use one device")
     if any(x.is_neg() or x.is_conj() for x in flat_inputs):
-        raise ValueError("megakernel: resolve lazy negative or conjugate input views before capture")
+        raise ValueError("trainkernel: resolve lazy negative or conjugate input views before capture")
     from torch.func import functionalize
     from torch.fx.experimental.proxy_tensor import make_fx
 
@@ -103,7 +171,7 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
     try:
         gm = make_fx(functionalize(flattened), tracing_mode="fake", _allow_non_fake_inputs=True)(*flat_inputs)
     except Exception as exc:
-        raise RuntimeError(f"megakernel: FX capture failed: {exc}") from exc
+        raise RuntimeError(f"trainkernel: FX capture failed: {exc}") from exc
 
     specs: dict[torch.fx.Node, TensorSpec] = {}
     inputs: list[TensorSpec] = []
@@ -119,13 +187,13 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
             inputs.append(spec)
             continue
         if node.op != "call_function":
-            raise ValueError(f"megakernel: unsupported FX node {node.op} ({node.target}); pass tensor constants as explicit inputs")
+            raise ValueError(f"trainkernel: unsupported FX node {node.op} ({node.target}); pass tensor constants as explicit inputs")
         target = str(node.target)
         if target.startswith("aten.copy_"):
-            raise ValueError("megakernel: input mutation is unsupported; return updated tensors instead")
+            raise ValueError("trainkernel: input mutation is unsupported; return updated tensors instead")
         shape, dtype = _metadata(node)
         if node.meta["val"].device != flat_inputs[0].device:
-            raise ValueError("megakernel: cross-device operations are unsupported")
+            raise ValueError("trainkernel: cross-device operations are unsupported")
         tensor_args = [specs[arg] for arg in node.args if isinstance(arg, torch.fx.Node)]
         if target in _VIEWS:
             specs[node] = _view(node, tensor_args[0], shape, dtype)
@@ -139,14 +207,14 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
                 return specs[arg]
             if isinstance(arg, (int, float)):
                 return arg
-            raise ValueError(f"megakernel: unsupported argument in {target}: {type(arg).__name__}")
+            raise ValueError(f"trainkernel: unsupported argument in {target}: {type(arg).__name__}")
 
         if short in _BINARY:
             if short == "div" and (len(node.args) > 2 or node.kwargs.get("rounding_mode") is not None):
-                raise ValueError("megakernel: rounded division is unsupported")
+                raise ValueError("trainkernel: rounded division is unsupported")
             operands = tuple(value(arg) for arg in node.args[:2])
             if short == "pow" and not isinstance(operands[1], (int, float)):
-                raise ValueError("megakernel: pow supports a scalar exponent only")
+                raise ValueError("trainkernel: pow supports a scalar exponent only")
             if short in {"add", "sub"}:
                 attrs["alpha"] = node.kwargs.get("alpha", node.args[2] if len(node.args) > 2 else 1)
             op = short
@@ -181,71 +249,39 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
             operands = (tensor_args[0],)
             op = "cast"
         else:
-            raise ValueError(f"megakernel: unsupported ATen op {target} at {node.name}")
+            raise ValueError(f"trainkernel: unsupported ATen op {target} at {node.name}")
         output = TensorSpec(node.name, shape, dtype, contiguous_strides(shape), node.name)
         specs[node] = output
         operations.append(Operation(node.name, op, operands, output, attrs))
     out_node = next(node for node in gm.graph.nodes if node.op == "output")
     flat_outputs, _ = tree_flatten(out_node.args[0])
     if captured_output_spec is None:
-        raise RuntimeError("megakernel: capture did not produce an output structure")
+        raise RuntimeError("trainkernel: capture did not produce an output structure")
     if any(not isinstance(node, torch.fx.Node) or node not in specs for node in flat_outputs):
-        raise ValueError("megakernel: outputs must contain tensors only")
+        raise ValueError("trainkernel: outputs must contain tensors only")
     return Program(tuple(inputs), tuple(operations), tuple(specs[node] for node in flat_outputs)), captured_output_spec
 
 
-def compile(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> Callable[..., Any]:
+def compile(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> CompiledFunction[Any]:
     """Compile a static pure function; explicit training graphs return gradients."""
     program, output_spec = capture(fn, example_inputs)
     return _compile_captured(program, output_spec, example_inputs, options)
 
 
-def _compile_captured(program: Program, output_spec: TreeSpec, example_inputs: Sequence[Any], options: dict[str, Any]) -> Callable[..., Any]:
+def _compile_captured(
+    program: Program,
+    output_spec: TreeSpec,
+    example_inputs: Sequence[Any],
+    options: dict[str, Any],
+    compiled_type: type[CompiledFunction[Any]] = CompiledFunction,
+) -> CompiledFunction[Any]:
     _, input_spec = tree_flatten(tuple(example_inputs))
     from .runtime import compile_program
     runner = compile_program(program, example_inputs, **options)
-
-    def wrapped(*args: Any) -> Any:
-        flat, actual_spec = tree_flatten(args)
-        if actual_spec != input_spec:
-            raise ValueError("megakernel: runtime input pytree differs from the compiled signature")
-        return tree_unflatten(list(runner(*flat)), output_spec)
-
-    wrapped.program = program
-    wrapped.runner = runner
-    wrapped.source = runner.source
-    def capture_graph(*args: Any, warmup: int = 3) -> CapturedProgram:
-        if type(warmup) is not int or warmup < 1:
-            raise ValueError("megakernel: graph warmup must be positive")
-        flat, actual_spec = tree_flatten(args)
-        if actual_spec != input_spec:
-            raise ValueError("megakernel: runtime input pytree differs from the compiled signature")
-        runner._validate_inputs(tuple(flat))
-        with torch.cuda.device(runner.device):
-            saved = {i: flat[i].clone() for i in runner.inplace_outputs.values()}
-            try:
-                for _ in range(warmup):
-                    wrapped(*args)
-                torch.cuda.synchronize(runner.device)
-            finally:
-                for i, original in saved.items():
-                    flat[i].copy_(original)
-            torch.cuda.synchronize(runner.device)
-            graph = torch.cuda.CUDAGraph()
-            try:
-                with torch.cuda.graph(graph):
-                    outputs = wrapped(*args)
-            finally:
-                for i, original in saved.items():
-                    flat[i].copy_(original)
-                torch.cuda.synchronize(runner.device)
-        # Keep immutable leaf references even if callers later edit a dict/list.
-        return CapturedProgram(graph, args, outputs, tuple(flat))
-    wrapped.capture = capture_graph
-    return wrapped
+    return compiled_type(program, runner, input_spec, output_spec)
 
 
-def compile_training(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> Callable[..., Any]:
+def compile_training(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> CompiledTrainingStep[Any]:
     """Compile `(state, *data) -> (scalar_loss, gradients, updated_state)`.
 
     State and gradient pytrees must match. Updated state is committed in place
@@ -254,7 +290,7 @@ def compile_training(fn: Callable[..., Any], example_inputs: Sequence[Any], **op
     be detached from autograd; the function contains its own differentiation.
     """
     if "inplace_outputs" in options:
-        raise ValueError("megakernel: compile_training derives its own state mapping")
+        raise ValueError("trainkernel: compile_training derives its own state mapping")
     program, output_spec = capture(fn, example_inputs)
     _, input_spec = tree_flatten(tuple(example_inputs))
     # PyTorch 2.11 introduced accessors while 2.8 exposes children_specs.
@@ -264,15 +300,21 @@ def compile_training(fn: Callable[..., Any], example_inputs: Sequence[Any], **op
     state_spec = children(input_spec)[0]
     output_children = children(output_spec)
     if output_spec.type not in (tuple, list) or len(output_children) != 3:
-        raise ValueError("megakernel: training function must return loss, gradients, updated state")
+        raise ValueError("trainkernel: training function must return loss, gradients, updated state")
     loss_spec, gradient_spec, update_spec = output_children
     if not loss_spec.is_leaf() or gradient_spec != state_spec or update_spec != state_spec:
-        raise ValueError("megakernel: gradients and updated state must match the state pytree")
+        raise ValueError("trainkernel: gradients and updated state must match the state pytree")
     n = state_spec.num_leaves
     if not n or program.outputs[0].shape:
-        raise ValueError("megakernel: training requires nonempty state and a scalar loss")
+        raise ValueError("trainkernel: training requires nonempty state and a scalar loss")
     for gradient, parameter in zip(program.outputs[1:1+n], program.inputs[:n]):
         if gradient.shape != parameter.shape or gradient.dtype != parameter.dtype:
-            raise ValueError("megakernel: gradients must match parameter shapes and dtypes")
+            raise ValueError("trainkernel: gradients must match parameter shapes and dtypes")
     options["inplace_outputs"] = {1 + n + i: i for i in range(n)}
-    return _compile_captured(program, output_spec, example_inputs, options)
+    return _compile_captured(
+        program,
+        output_spec,
+        example_inputs,
+        options,
+        compiled_type=CompiledTrainingStep,
+    )

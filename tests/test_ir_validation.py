@@ -1,7 +1,7 @@
 """Malformed IR must fail before producing an unsafe CUDA memory access."""
 import pytest
-from megakernel.ir import TensorSpec,Operation,Program
-from megakernel.codegen import generate
+from trainkernel.ir import TensorSpec,Operation,Program
+from trainkernel.codegen import generate
 
 
 def spec(name,shape,strides=None,buffer=None,offset=0):

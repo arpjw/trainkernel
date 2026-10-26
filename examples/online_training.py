@@ -9,7 +9,7 @@ training contract; it is not an application-level throughput benchmark.
 from __future__ import annotations
 import math
 import torch
-import megakernel
+import trainkernel
 
 
 def training_step(state, x, target):
@@ -33,7 +33,7 @@ def main():
     initial = tuple(p.clone() for p in state)
     x = torch.randn(4,32,device=device,dtype=torch.bfloat16)
     target = torch.randn(4,16,device=device,dtype=torch.bfloat16)
-    compiled = megakernel.compile_training(training_step, (state,x,target), max_blocks=1)
+    compiled = trainkernel.compile_training(training_step, (state,x,target), max_blocks=1)
     # capture() warms up, restores state, and binds the graph to these buffers.
     captured = compiled.capture(state, x, target, warmup=3)
     reference = initial

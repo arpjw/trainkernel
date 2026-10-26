@@ -1,6 +1,6 @@
 """Compile an nn.Module's functional loss, gradients, and SGD updates together."""
 import torch
-import megakernel
+import trainkernel
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
         updated = {name: weight - 1e-3 * gradients[name] for name, weight in p.items()}
         return value, gradients, updated
 
-    compiled = megakernel.compile(train_step, (params, x, target))
+    compiled = trainkernel.compile(train_step, (params, x, target))
     for iteration in range(10):
         loss, gradients, params = compiled(params, x, target)
         print(f"step={iteration} loss={loss.item():.6f}")

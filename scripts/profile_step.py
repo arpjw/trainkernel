@@ -5,7 +5,7 @@ import hashlib
 from pathlib import Path
 import torch
 from benchmarks.train_mlp import make_inputs, step
-from megakernel import compile
+from trainkernel import compile
 
 
 def main():

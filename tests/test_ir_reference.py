@@ -3,8 +3,8 @@ import torch
 from torch.utils._pytree import tree_flatten, tree_unflatten
 
 from benchmarks.train_mlp import make_inputs, step
-from megakernel import capture
-from megakernel.reference import run
+from trainkernel import capture
+from trainkernel.reference import run
 
 
 def check(fn, args, **tolerances):
@@ -79,5 +79,5 @@ def test_nn_module_training_via_functional_call():
         return value, grads, {key: p[key] - 1e-3 * grads[key] for key in p}
     program = check(train, (params, x, y))
     assert any(op.op == "addmm" for op in program.operations)
-    from megakernel.codegen import generate
+    from trainkernel.codegen import generate
     assert generate(program).materialized_operations > 0

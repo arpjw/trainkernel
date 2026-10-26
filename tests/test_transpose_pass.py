@@ -1,9 +1,9 @@
 import pytest
 import torch
-from megakernel import capture
-from megakernel.ir import validate
-from megakernel.passes import canonicalize_transposed_mm
-from megakernel.reference import run
+from trainkernel import capture
+from trainkernel.ir import validate
+from trainkernel.passes import canonicalize_transposed_mm
+from trainkernel.reference import run
 
 
 @pytest.mark.parametrize('observed',[False,True])

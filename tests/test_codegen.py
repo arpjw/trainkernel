@@ -2,8 +2,8 @@ import pytest
 import torch
 
 from benchmarks.train_mlp import make_inputs, step
-from megakernel import capture
-from megakernel.codegen import _Generator, generate, numel
+from trainkernel import capture
+from trainkernel.codegen import _Generator, generate, numel
 
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.bfloat16, torch.float16])
@@ -40,7 +40,7 @@ def test_training_codegen_and_arena_lifetimes(dtype):
 
 
 def test_cpu_compile_has_explicit_error():
-    from megakernel import compile
+    from trainkernel import compile
     with pytest.raises(RuntimeError, match="CUDA SM80"):
         compile(lambda x: x + 1, (torch.ones(4),))
 

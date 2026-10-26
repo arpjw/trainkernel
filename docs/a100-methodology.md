@@ -41,10 +41,18 @@ interleaved with alternating order to reduce drift from short-term device
 effects. The final run requests 30 paired samples per method and records raw
 samples, medians, p10, and p90.
 
-The in-run bootstrap resamples same-index raw samples with deterministic seed 0 and
-2,000 draws. It reports ratios where values below 1.0 mean the numerator is
+The in-run bootstrap resamples same-index timing samples for each method with
+deterministic seed 0 and 2,000 draws, then takes the ratio of resampled
+medians. It reports ratios where values below 1.0 mean the numerator is
 faster. Confidence intervals describe variation in this run; they do not
 account for workload, driver, clock, or machine selection.
+
+The JSON also reports compilation amortization against the fastest
+correctness-passing reference. `break_even_steps` estimates the number of
+steady-state updates needed to recover compilation time from the per-step
+saving; it is null when the megakernel is slower or no passing reference is
+available. This is a single-run accounting estimate, not a deployment cost
+model.
 
 ## Limits
 
