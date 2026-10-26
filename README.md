@@ -82,6 +82,13 @@ cuda_source = generate(program).source
 bash scripts/run_train_loop_suite.sh results/a100-optimization/heldout
 ```
 
+For a clean release-candidate check, including the useful classification-head
+workload and package build:
+
+```bash
+bash scripts/run_release_validation.sh results/release-validation
+```
+
 The [training-loop harness](benchmarks/train_loop.py) uses FP32 master weights, BF16 compute, FP32 loss, and FP32 SGD updates. It checks every loss, gradient, and updated parameter for 100 steps and separately checks a captured 20-step replay. Timed graphs include state feedback over four resident batches. They compare pure and in-place megakernels, captured eager PyTorch, and default and eager-rounding Inductor variants. CUDA event timings exclude compilation, capture, reset, and warmup, and retain raw samples. Numerical failures remain visible for all baselines. The [methodology](docs/a100-methodology.md) explains the held-out seeds and fixed tolerance policy; the [result](results/a100-optimization/README.md) includes both wins and regressions. The older [native-BF16 fixed-step harness](benchmarks/train_mlp.py) remains available for the historical report.
 
 ## Supported subset
