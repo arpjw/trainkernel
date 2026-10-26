@@ -40,15 +40,20 @@ def tolerances(dtype):
     return {"rtol": 0.0002, "atol": 0.00002}
 
 
-def compare(actual, expected, dtype):
+def compare(actual, expected, dtype, *, enforce=True):
     got, got_tree = tree_flatten(actual)
     want, want_tree = tree_flatten(expected)
     assert got_tree == want_tree
-    errors = []
-    for a, b in zip(got, want):
-        torch.testing.assert_close(a, b, **tolerances(dtype))
-        errors.append(float((a.float() - b.float()).abs().max()) if a.numel() else 0.0)
-    return {"passed": True, "max_absolute_error_per_output": errors, "tolerances": tolerances(dtype)}
+    errors, failures = [], []
+    for index, (a, b) in enumerate(zip(got, want)):
+        errors.append(float((a.detach().float() - b.detach().float()).abs().max()) if a.numel() else 0.0)
+        try:
+            torch.testing.assert_close(a, b, **tolerances(dtype))
+        except AssertionError as exc:
+            if enforce:
+                raise
+            failures.append({"output": index, "error": str(exc)})
+    return {"passed": not failures, "max_absolute_error_per_output": errors, "tolerances": tolerances(dtype), "failures": failures}
 
 
 def trajectory(fn, params, x, target, steps, dtype):
@@ -124,7 +129,7 @@ def main(argv=None):
             generated = mega.runner.generated
             result["kernel"] = {"launches_per_step": 1, "materialized_operations": generated.materialized_operations,
                                 "inlined_operations": generated.inlined_operations, "tensor_core_operations": generated.tensor_core_operations,
-                                "workspace_bytes": generated.workspace_elements * 4, "blocks_per_sm_limit": generated.blocks_per_sm, "max_work_blocks": generated.max_work_blocks}
+                                "workspace_bytes": generated.workspace_elements * 4, "blocks_per_sm_limit": generated.blocks_per_sm, "max_work_blocks": generated.max_work_blocks, "grid_barriers": generated.grid_barriers}
             if args.dump_cuda:
                 args.dump_cuda.parent.mkdir(parents=True, exist_ok=True)
                 args.dump_cuda.write_text(mega.source)
@@ -144,10 +149,26 @@ def main(argv=None):
                 inductor_outputs = compiled(params, x, target)
                 torch.cuda.synchronize()
                 result["inductor_compile_seconds"] = time.perf_counter() - start
-                compare(inductor_outputs, reference, dtype)
+                result["inductor_correctness"] = compare(inductor_outputs, reference, dtype, enforce=False)
                 del inductor_outputs
                 methods["inductor_max_autotune"] = lambda: compiled(params, x, target)
                 result["inductor_cuda_graphs_requested"] = True
+                # Capture optimized Inductor kernels directly as an additional
+                # baseline, eliminating its Python wrapper from GPU comparisons.
+                graphable = torch.compile(eager, mode="max-autotune-no-cudagraphs", fullgraph=True)
+                graph, outputs = _capture(lambda: graphable(params, x, target))
+                graph.replay()
+                result["inductor_graph_correctness"] = compare(outputs, reference, dtype, enforce=False)
+                methods["inductor_cuda_graph"] = graph.replay
+                from torch._inductor import list_mode_options
+                strict_options = dict(list_mode_options("max-autotune-no-cudagraphs"))
+                strict_options["emulate_precision_casts"] = True
+                strict = torch.compile(eager, options=strict_options, fullgraph=True)
+                strict_graph, strict_outputs = _capture(lambda: strict(params, x, target))
+                strict_graph.replay()
+                result["inductor_eager_rounding_correctness"] = compare(strict_outputs, reference, dtype, enforce=False)
+                result["inductor_eager_rounding_options"] = strict_options
+                methods["inductor_eager_rounding_cuda_graph"] = strict_graph.replay
             for name, fn in methods.items():
                 result["timings"][name] = _measure(fn, warmup=args.warmup, samples=args.repeats, inner=args.inner)
             result["status"] = "ok"

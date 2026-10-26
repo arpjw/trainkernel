@@ -52,3 +52,44 @@ def test_transpose_broadcast_partial_reduction(dtype):
     fn = lambda a, b: (a + b).sum((0, 2), keepdim=True)
     compiled = mk_compile(fn, (x, bias))
     torch.testing.assert_close(compiled(x, bias), fn(x, bias), rtol=0.02, atol=0.01)
+
+
+def test_view_only_outputs_and_casts():
+    x = torch.randn(3, 7, device="cuda")
+    fn = lambda a: {"transpose": a.t(), "alias": a.detach(), "cast": torch.add(a, a, alpha=0.25).to(torch.bfloat16)}
+    compiled = mk_compile(fn, (x,))
+    actual, expected = compiled(x), fn(x)
+    for key in expected:
+        torch.testing.assert_close(actual[key], expected[key])
+
+
+def test_nn_linear_training_addmm_epilogue():
+    model = torch.nn.Sequential(torch.nn.Linear(11, 17), torch.nn.ReLU(), torch.nn.Linear(17, 5)).cuda()
+    params = dict(model.named_parameters())
+    x, target = torch.randn(7, 11, device="cuda"), torch.randn(7, 5, device="cuda")
+    def fn(p, x, target):
+        def loss(p):
+            return ((torch.func.functional_call(model, p, (x,)) - target) ** 2).mean()
+        gradients, value = torch.func.grad_and_value(loss)(p)
+        return value, gradients, {key: p[key] - 1e-3 * gradients[key] for key in p}
+    compiled = mk_compile(fn, (params, x, target))
+    compare(compiled(params, x, target), fn(params, x, target), torch.float32)
+
+
+def test_addmm_beta_zero_ignores_nan_bias():
+    a = torch.randn(3, 7, device="cuda")
+    b = torch.randn(7, 5, device="cuda")
+    bias = torch.full((5,), float("nan"), device="cuda")
+    fn = lambda a, b, c: (torch.addmm(c, a, b, beta=0), torch.addmm(c, a, b, alpha=0, beta=0))
+    compiled = mk_compile(fn, (a, b, bias))
+    for actual, expected in zip(compiled(a, b, bias), fn(a, b, bias)):
+        torch.testing.assert_close(actual, expected)
+
+
+@pytest.mark.parametrize('dtype', [torch.bfloat16, torch.float16])
+def test_small_tensor_core_tile(dtype):
+    a = torch.randn(3, 8, device='cuda', dtype=dtype)
+    b = torch.randn(8, 5, device='cuda', dtype=dtype)
+    compiled = mk_compile(lambda a, b: a @ b, (a, b))
+    torch.testing.assert_close(compiled(a, b), a @ b, rtol=0.02, atol=0.004)
+    assert compiled.runner.generated.max_work_blocks == 1

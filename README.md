@@ -11,12 +11,14 @@ This is an initial compiler research prototype. Performance results belong in `r
 Linux, Python 3.10+, PyTorch 2.6+, an NVIDIA SM80+ GPU, a compatible CUDA development toolkit with `nvcc`, and a C++ compiler are required for generated kernel execution. CPU capture and IR reference checks also run on macOS.
 
 ```bash
+python -m venv --system-site-packages .venv
+source .venv/bin/activate
 python -m pip install -e '.[dev]'
 python -m pytest -q
 python -m examples.train
 ```
 
-Both A100 and H100 are supported by the generic SM80+ code path. Hopper-specific TMA/WGMMA scheduling is not implemented.
+The backend targets SM80+, including A100 and H100. Execution evidence currently covers A100; H100 has not been tested. Hopper-specific TMA/WGMMA scheduling is not implemented.
 
 ## Compile a training step
 
@@ -34,7 +36,7 @@ compiled = megakernel.compile(train_step, (weights, x, target))
 loss, gradients, weights = compiled(weights, x, target)
 ```
 
-`examples/train.py` uses `torch.nn.Linear` modules through `torch.func.functional_call`. Parameters may be nested dictionaries or tuples. Updated parameters are returned explicitly; inputs are not mutated. The result does not register a new autograd function. Different shapes, strides, devices, or dtypes require another compilation.
+`examples/train.py` uses `torch.nn.Linear` modules through `torch.func.functional_call`. Parameters may be nested dictionaries or tuples. Updated parameters are returned explicitly; inputs are not mutated. Returned tensors are independent contiguous materializations, so output alias identity and original view strides are not preserved. The result does not register a new autograd function. Different shapes, strides, devices, or dtypes require another compilation.
 
 Inspect the compiler without a GPU:
 
@@ -52,9 +54,9 @@ python -m benchmarks.train_mlp --dtype bfloat16 \
   --json results/a100-small-bf16.json
 ```
 
-The harness checks every loss, parameter gradient, and updated parameter against eager PyTorch, then compares a repeated SGD trajectory. It reports fixed-input step latency for eager, eager with CUDA Graphs, the megakernel, the megakernel with CUDA Graphs, and `torch.compile(mode="max-autotune")`, which requests Inductor's CUDA Graph optimization. Timings exclude compilation, use CUDA events, and include median/p10/p90 over repeated samples. Graph timing keeps inputs fixed; the separate trajectory check advances training state.
+The harness checks every loss, parameter gradient, and updated parameter against eager PyTorch, then compares a repeated SGD trajectory. It reports fixed-input step latency for eager, eager with CUDA Graphs, the megakernel, the megakernel with CUDA Graphs, and `torch.compile(mode="max-autotune")`, which requests Inductor's CUDA Graph optimization. It also directly captures optimized Inductor kernels with CUDA Graphs, removing Python wrapper overhead, and measures an additional Inductor configuration with eager-style precision rounding. Default Inductor can elide BF16 rounding boundaries; its numerical checks are reported separately rather than weakening the megakernel's correctness gate. Timings exclude compilation, use CUDA events, and include median/p10/p90 over repeated samples. Graph timing keeps inputs fixed; the separate trajectory check advances training state.
 
-Use identical shapes and precision when comparing results. `--skip-inductor` is a debugging option and does not establish an advantage over compiled PyTorch.
+Use identical shapes and precision when comparing results. The BF16 benchmark uses BF16 parameters, gradients, loss, and SGD updates; it does not establish FP32 master-weight mixed-precision behavior or long-run convergence. `--skip-inductor` is a debugging option and does not establish an advantage over compiled PyTorch.
 
 ## Supported subset
 

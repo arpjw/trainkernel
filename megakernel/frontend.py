@@ -71,8 +71,15 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
     from torch.func import functionalize
     from torch.fx.experimental.proxy_tensor import make_fx
 
+    captured_output_spec: TreeSpec | None = None
+
     def flattened(*args: torch.Tensor) -> Any:
-        return fn(*tree_unflatten(list(args), input_spec))
+        nonlocal captured_output_spec
+        result = fn(*tree_unflatten(list(args), input_spec))
+        leaves, captured_output_spec = tree_flatten(result)
+        # FX freezes dict/list constants into its own immutable container types.
+        # Trace flat leaves and keep the user's original container specification.
+        return tuple(leaves)
 
     try:
         gm = make_fx(functionalize(flattened), tracing_mode="fake", _allow_non_fake_inputs=True)(*flat_inputs)
@@ -158,10 +165,12 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
         specs[node] = output
         operations.append(Operation(node.name, op, operands, output, attrs))
     out_node = next(node for node in gm.graph.nodes if node.op == "output")
-    flat_outputs, output_spec = tree_flatten(out_node.args[0])
+    flat_outputs, _ = tree_flatten(out_node.args[0])
+    if captured_output_spec is None:
+        raise RuntimeError("megakernel: capture did not produce an output structure")
     if any(not isinstance(node, torch.fx.Node) or node not in specs for node in flat_outputs):
         raise ValueError("megakernel: outputs must contain tensors only")
-    return Program(tuple(inputs), tuple(operations), tuple(specs[node] for node in flat_outputs)), output_spec
+    return Program(tuple(inputs), tuple(operations), tuple(specs[node] for node in flat_outputs)), captured_output_spec
 
 
 def compile(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> Callable[..., Any]:

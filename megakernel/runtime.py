@@ -3,13 +3,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
-import os
 from typing import Any
 
 import torch
 from torch.utils._pytree import tree_flatten
 
-from .codegen import GeneratedKernel, generate, numel
+from .codegen import GeneratedKernel, generate
 from .ir import Program
 
 

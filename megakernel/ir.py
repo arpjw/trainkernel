@@ -1,6 +1,5 @@
 """Small, serialisable intermediate representation for megakernel programs."""
 from dataclasses import dataclass, field
-from typing import Any
 
 @dataclass(frozen=True)
 class TensorSpec:

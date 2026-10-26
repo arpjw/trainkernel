@@ -50,6 +50,7 @@ class GeneratedKernel:
     tensor_core_operations: int
     blocks_per_sm: int
     max_work_blocks: int
+    grid_barriers: int
 
 
 class _Generator:
@@ -191,6 +192,13 @@ class _Generator:
             coordinates[d] = coord
         value = self.read(source, tuple(coordinates))
         size = numel(reduced_shape)
+        if size <= 128 and numel(op.output.shape) >= 8:
+            finish = "acc" if op.op == "sum" else f"(acc / {size}.0f)" if size else "NAN"
+            return f"""for (int64_t row = tid; row < {numel(op.output.shape)}LL; row += nt) {{
+                float acc = 0.0f;
+                for (int64_t r = 0; r < {size}LL; ++r) acc += {value};
+                workspace[{self.offsets[op.output.buffer]}LL + row] = {_round(finish, op.output.dtype)};
+            }}"""
         finish = "shared_reduce[0]" if op.op == "sum" else f"(shared_reduce[0] / {size}.0f)" if size else "NAN"
         return f"""for (int64_t row = blockIdx.x; row < {numel(op.output.shape)}LL; row += gridDim.x) {{
             float acc = 0.0f;
@@ -214,42 +222,54 @@ class _Generator:
         def epilogue(acc: str, index: str) -> str:
             if op.op != "addmm":
                 return acc
+            alpha, beta = op.attrs.get("alpha", 1), op.attrs.get("beta", 1)
+            if alpha == 0 and beta == 0:
+                return "0.0f"
+            if beta == 0:
+                return f"({_literal(alpha)} * ({acc}))"
             bias = self.operand(op.inputs[0], op.output, index)
-            return f"({_literal(op.attrs.get('alpha', 1))} * ({acc}) + {_literal(op.attrs.get('beta', 1))} * ({bias}))"
+            if alpha == 0:
+                return f"({_literal(beta)} * ({bias}))"
+            return f"({_literal(alpha)} * ({acc}) + {_literal(beta)} * ({bias}))"
         if a.dtype == b.dtype and a.dtype in {"bfloat16", "float16"}:
             self.tensor_core_count += 1
             cast = "__float2bfloat16_rn" if a.dtype == "bfloat16" else "__float2half_rn"
             typ = _DTYPES[a.dtype]
+            tile_size = 16 if m <= 16 and n <= 16 else 32
+            warp_columns = tile_size // 16
+            active_warps = warp_columns * warp_columns
             av = self.read(a, ("ar", "ak"))
             bv = self.read(b, ("bk", "bc"))
             return f"""{{
             auto* sa = reinterpret_cast<{typ}*>(shared_a);
             auto* sb = reinterpret_cast<{typ}*>(shared_b);
             const int warp = threadIdx.x / 32;
-            for (int64_t tile = blockIdx.x; tile < {((m + 31)//32)*((n + 31)//32)}LL; tile += gridDim.x) {{
-                const int64_t row = (tile / {(n+31)//32 or 1}LL) * 32;
-                const int64_t col = (tile % {(n+31)//32 or 1}LL) * 32;
+            for (int64_t tile = blockIdx.x; tile < {((m + tile_size - 1)//tile_size)*((n + tile_size - 1)//tile_size)}LL; tile += gridDim.x) {{
+                const int64_t row = (tile / {(n+tile_size-1)//tile_size or 1}LL) * {tile_size};
+                const int64_t col = (tile % {(n+tile_size-1)//tile_size or 1}LL) * {tile_size};
                 nvcuda::wmma::fragment<nvcuda::wmma::accumulator, 16, 16, 16, float> acc;
                 nvcuda::wmma::fill_fragment(acc, 0.0f);
                 for (int64_t kk = 0; kk < {k}LL; kk += 16) {{
-                    for (int p = threadIdx.x; p < 512; p += blockDim.x) {{
+                    for (int p = threadIdx.x; p < {tile_size * 16}; p += blockDim.x) {{
                         const int64_t ar = row + p / 16, ak = kk + p % 16;
-                        const int64_t bk = kk + p / 32, bc = col + p % 32;
+                        const int64_t bk = kk + p / {tile_size}, bc = col + p % {tile_size};
                         sa[p] = {cast}((ar < {m}LL && ak < {k}LL) ? {av} : 0.0f);
                         sb[p] = {cast}((bk < {k}LL && bc < {n}LL) ? {bv} : 0.0f);
                     }}
                     __syncthreads();
+                    if (warp < {active_warps}) {{
                     nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, 16, 16, 16, {typ}, nvcuda::wmma::row_major> af;
                     nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, 16, 16, 16, {typ}, nvcuda::wmma::row_major> bf;
-                    nvcuda::wmma::load_matrix_sync(af, sa + (warp / 2) * 16 * 16, 16);
-                    nvcuda::wmma::load_matrix_sync(bf, sb + (warp % 2) * 16, 32);
+                    nvcuda::wmma::load_matrix_sync(af, sa + (warp / {warp_columns}) * 16 * 16, 16);
+                    nvcuda::wmma::load_matrix_sync(bf, sb + (warp % {warp_columns}) * 16, {tile_size});
                     nvcuda::wmma::mma_sync(acc, af, bf, acc);
+                    }}
                     __syncthreads();
                 }}
-                nvcuda::wmma::store_matrix_sync(shared_c + (warp / 2) * 16 * 32 + (warp % 2) * 16, acc, 32, nvcuda::wmma::mem_row_major);
+                if (warp < {active_warps}) nvcuda::wmma::store_matrix_sync(shared_c + (warp / {warp_columns}) * 16 * {tile_size} + (warp % {warp_columns}) * 16, acc, {tile_size}, nvcuda::wmma::mem_row_major);
                 __syncthreads();
-                for (int p = threadIdx.x; p < 1024; p += blockDim.x) {{
-                    int64_t rr = row + p / 32, cc = col + p % 32;
+                for (int p = threadIdx.x; p < {tile_size * tile_size}; p += blockDim.x) {{
+                    int64_t rr = row + p / {tile_size}, cc = col + p % {tile_size};
                     if (rr < {m}LL && cc < {n}LL) workspace[{self.offsets[op.output.buffer]}LL + rr * {n}LL + cc] = {_round(epilogue('shared_c[p]', f'rr * {n}LL + cc'), op.output.dtype)};
                 }}
                 __syncthreads();
@@ -289,6 +309,21 @@ class _Generator:
             if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", spec.buffer):
                 raise ValueError("megakernel: invalid buffer identifier")
         statements = []
+        stage_reads: list[tuple[int, int]] = []
+        stage_writes: list[tuple[int, int]] = []
+        barriers = 0
+
+        def read_regions(spec: TensorSpec) -> list[tuple[int, int]]:
+            if spec.buffer in self.inline:
+                return [region for value in self.producers[spec.buffer].inputs if isinstance(value, TensorSpec) for region in read_regions(value)]
+            if spec.buffer in self.input_indices:
+                return []
+            start = self.offsets[spec.buffer]
+            return [(start, start + numel(self.producers[spec.buffer].output.shape))]
+
+        def overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
+            return left[0] < right[1] and right[0] < left[1]
+
         for op in self.materialized:
             if op.output.strides != contiguous_strides(op.output.shape):
                 # Size-one dimensions may have arbitrary equivalent strides.
@@ -302,7 +337,23 @@ class _Generator:
                 code = self.emit_pointwise(op)
             else:
                 raise ValueError(f"megakernel: unsupported CUDA operation {op.op}")
-            statements.append(f"// {op.name}: {op.op}\n{{\n{code}\n}}\ngrid.sync();")
+            reads = [region for value in op.inputs if isinstance(value, TensorSpec) for region in read_regions(value)]
+            start = self.offsets[op.output.buffer]
+            write = (start, start + numel(op.output.shape))
+            # Remove barriers only when both dependencies and arena reuse permit
+            # overlap. Include write-after-read hazards on recycled allocations.
+            hazard = any(overlap(old, new) for old in stage_writes for new in (*reads, write)) or any(overlap(old, write) for old in stage_reads)
+            if hazard:
+                statements.append("mk_grid_sync(grid);")
+                barriers += 1
+                stage_reads.clear()
+                stage_writes.clear()
+            statements.append(f"// {op.name}: {op.op}\n{{\n{code}\n}}")
+            stage_reads.extend(reads)
+            stage_writes.append(write)
+        if stage_writes:
+            statements.append("mk_grid_sync(grid);")
+            barriers += 1
         for i, spec in enumerate(self.program.outputs):
             value = self.read(spec, self.coords(spec.shape, "i"))
             stored = f"__float2bfloat16_rn({value})" if spec.dtype == "bfloat16" else f"__float2half_rn({value})" if spec.dtype == "float16" else value
@@ -311,17 +362,21 @@ class _Generator:
         for op in self.materialized:
             if op.op in {"mm", "addmm"}:
                 a, b = op.inputs[1:3] if op.op == "addmm" else op.inputs[:2]
-                tm, tn = (32, 32) if a.dtype in {"float16", "bfloat16"} else (16, 8)
+                tm, tn = ((16, 16) if a.shape[0] <= 16 and b.shape[1] <= 16 else (32, 32)) if a.dtype in {"float16", "bfloat16"} else (16, 8)
                 work_blocks.append(((a.shape[0] + tm - 1) // tm) * ((b.shape[1] + tn - 1) // tn))
             elif op.op in {"sum", "mean"}:
-                work_blocks.append(numel(op.output.shape))
+                source = op.inputs[0]
+                dims = tuple(int(d) % len(source.shape) for d in op.attrs.get("dims", tuple(range(len(source.shape))))) if source.shape else ()
+                reduction_size = math.prod(source.shape[d] for d in set(dims))
+                rows = numel(op.output.shape)
+                work_blocks.append((rows + 127) // 128 if reduction_size <= 128 and rows >= 8 else rows)
             else:
                 work_blocks.append((numel(op.output.shape) + 127) // 128)
         work_blocks.extend((numel(output.shape) + 127) // 128 for output in self.program.outputs)
         max_work_blocks = max(work_blocks)
         source = _CUDA_PREAMBLE.replace("@INPUT_COUNT@", str(max(1, len(self.program.inputs)))).replace("@OUTPUT_COUNT@", str(max(1, len(self.program.outputs))))
         source += "\n".join(statements) + "\n}\n" + _CUDA_HOST.replace("@INPUT_COUNT@", str(len(self.program.inputs))).replace("@OUTPUT_COUNT@", str(len(self.program.outputs))).replace("@BLOCKS_PER_SM@", str(self.blocks_per_sm)).replace("@MAX_WORK_BLOCKS@", str(max_work_blocks))
-        return GeneratedKernel(source, self.workspace_elements, len(self.materialized), len(self.inline), self.tensor_core_count, self.blocks_per_sm, max_work_blocks)
+        return GeneratedKernel(source, self.workspace_elements, len(self.materialized), len(self.inline), self.tensor_core_count, self.blocks_per_sm, max_work_blocks, barriers)
 
 
 def generate(program: Program, *, blocks_per_sm: int = 1, fuse_pointwise: bool = True) -> GeneratedKernel:
@@ -346,6 +401,10 @@ _CUDA_PREAMBLE = r'''
 #include <algorithm>
 #include <cstdint>
 namespace cg = cooperative_groups;
+__device__ __forceinline__ void mk_grid_sync(cg::grid_group& grid) {
+    if (gridDim.x == 1) __syncthreads();
+    else grid.sync();
+}
 struct Arguments { const void* inputs[@INPUT_COUNT@]; void* outputs[@OUTPUT_COUNT@]; };
 __device__ __forceinline__ float mk_relu(float x) { return x < 0.0f ? 0.0f : x; }
 __device__ __forceinline__ float mk_square(float x) { return x * x; }

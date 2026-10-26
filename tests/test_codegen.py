@@ -41,3 +41,16 @@ def test_cpu_compile_has_explicit_error():
     from megakernel import compile
     with pytest.raises(RuntimeError, match="CUDA SM80"):
         compile(lambda x: x + 1, (torch.ones(4),))
+
+
+def test_independent_outputs_share_a_barrier_but_dependencies_do_not():
+    x = torch.randn(33)
+    independent, _ = capture(lambda x: (x + 1, x + 2), (x,))
+    dependent, _ = capture(lambda x: (x + 1, (x + 1) * 2), (x,))
+    assert generate(independent).grid_barriers == 1
+    # Explicitly return a producer and its consumer to prevent inlining.
+    def chain(x):
+        y = x + 1
+        return y, y * 2
+    dependent, _ = capture(chain, (x,))
+    assert generate(dependent).grid_barriers == 2

@@ -12,8 +12,9 @@ def check(fn, args, **tolerances):
     expected = fn(*args)
     flat_inputs, _ = tree_flatten(args)
     actual = tree_unflatten(list(run(program, flat_inputs)), output_spec)
-    actual_flat, _ = tree_flatten(actual)
-    expected_flat, _ = tree_flatten(expected)
+    actual_flat, actual_tree = tree_flatten(actual)
+    expected_flat, expected_tree = tree_flatten(expected)
+    assert actual_tree == expected_tree
     for got, want in zip(actual_flat, expected_flat):
         torch.testing.assert_close(got, want, **tolerances)
     return program
