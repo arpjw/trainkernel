@@ -1,0 +1,94 @@
+{
+  "shape": [
+    4,
+    32,
+    64,
+    16
+  ],
+  "max_blocks": 1,
+  "instrumented": true,
+  "stages": [
+    {
+      "operations": [
+        [
+          "mm_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 3.808
+    },
+    {
+      "operations": [
+        [
+          "mm_1_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 3.968
+    },
+    {
+      "operations": [
+        [
+          "mean",
+          "mean"
+        ],
+        [
+          "mul_1",
+          "mul"
+        ]
+      ],
+      "median_us": 0.864
+    },
+    {
+      "operations": [
+        [
+          "sum_1",
+          "sum"
+        ],
+        [
+          "mm_2",
+          "mm"
+        ],
+        [
+          "mm_3_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 2.368
+    },
+    {
+      "operations": [
+        [
+          "sum_2",
+          "sum"
+        ],
+        [
+          "mm_4",
+          "mm"
+        ]
+      ],
+      "median_us": 1.952
+    },
+    {
+      "operations": [
+        [
+          "sub_1",
+          "sub"
+        ],
+        [
+          "sub_2",
+          "sub"
+        ],
+        [
+          "sub_3",
+          "sub"
+        ],
+        [
+          "sub_4",
+          "sub"
+        ]
+      ],
+      "median_us": 3.104
+    }
+  ]
+}

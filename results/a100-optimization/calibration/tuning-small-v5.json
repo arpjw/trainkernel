@@ -1,0 +1,154 @@
+{
+  "purpose": "exploratory tuning, not held-out evidence",
+  "case": "small",
+  "shape": [
+    32,
+    128,
+    256,
+    64
+  ],
+  "seed": 20261025,
+  "source_sha256": {
+    "megakernel/__init__.py": "1f146bdcaefd3d8e5d5d112f2aceff0bf250659b8450a414d2f5040c695c725e",
+    "megakernel/codegen.py": "1e453913fd820b91c3f883628dc3535e4bf1b0e11d6f84ea74532827df4eb68f",
+    "megakernel/frontend.py": "7cb9ef85aacbff64209de3dac967f426bade07f9962c8b0734a948c92540ab97",
+    "megakernel/gemv.py": "4f8ebaff4ec98f7b07f511a3fd7283f1962bfc01278b5409021e9411a8a09f77",
+    "megakernel/ir.py": "28d665f3ec59707c13c84c44eb85f4ea5de5c5b7520d2b79edb8c5a97afce526",
+    "megakernel/passes.py": "ee0f8bc21835b9ec26ca70865d7e027a1e92ce3a07fc9a46aa19cf09513ab8fc",
+    "megakernel/reference.py": "f2a653caae8f631fd56829fac01673fd5dc0132d6ba67774b1a014cf21bc6b73",
+    "megakernel/runtime.py": "ffe3493e762f19977b6ce3a7c84b9cdf3a132762420aeeffe82c042a34ea606a",
+    "megakernel/wmma.py": "4d58c59f838c50111cff50bfec1711917bef8cf9a6a4b154b269ccb3e8bf3d16"
+  },
+  "trials": [
+    {
+      "index": 1,
+      "compiler_options": {
+        "max_blocks": 108,
+        "shared_skew": 16
+      },
+      "compile_seconds": 45.800509742926806,
+      "resources": {
+        "registers_per_thread": 48,
+        "local_bytes_per_thread": 0,
+        "shared_bytes_per_block": 11776,
+        "resident_blocks_per_sm": 10
+      },
+      "cuda_sha256": "fe2c82c9b74879530e5af414dd60d8dc3e34f43b3cacfc397cfc6092b24a7dda",
+      "trajectory": {
+        "passed": true,
+        "steps": 100,
+        "initial_loss": 4.528809547424316,
+        "final_loss": 2.0842294692993164
+      },
+      "replay_correctness": {
+        "passed": true
+      },
+      "timing": {
+        "median_ms": 0.08006720244884491,
+        "p10_ms": 0.07987840175628662,
+        "p90_ms": 0.08019520044326782,
+        "samples": 30,
+        "steps_per_replay": 20,
+        "raw_ms": [
+          0.08028799891471863,
+          0.08006880283355713,
+          0.08030080199241638,
+          0.08008800148963928,
+          0.08012800216674805,
+          0.08000800013542175,
+          0.08012639880180358,
+          0.07997120022773743,
+          0.07986239790916443,
+          0.08009920120239258,
+          0.08008800148963928,
+          0.08009759783744812,
+          0.0798192024230957,
+          0.08019520044326782,
+          0.08016160130500793,
+          0.07987840175628662,
+          0.08004800081253052,
+          0.08006560206413268,
+          0.07995359897613526,
+          0.08004159927368164,
+          0.08010720014572144,
+          0.08002399802207946,
+          0.07996320128440856,
+          0.08022239804267883,
+          0.079995197057724,
+          0.08004959821701049,
+          0.08008480072021484,
+          0.07997599840164185,
+          0.0800320029258728,
+          0.08013759851455689
+        ]
+      },
+      "status": "ok"
+    },
+    {
+      "index": 4,
+      "compiler_options": {
+        "max_blocks": 216,
+        "blocks_per_sm": 2,
+        "shared_skew": 16
+      },
+      "compile_seconds": 45.849690229981206,
+      "resources": {
+        "registers_per_thread": 48,
+        "local_bytes_per_thread": 0,
+        "shared_bytes_per_block": 11776,
+        "resident_blocks_per_sm": 10
+      },
+      "cuda_sha256": "808b218ef6ab87696caa8e6a5dd55c70ff9452bf45eb0c684874f03390ac13ed",
+      "trajectory": {
+        "passed": true,
+        "steps": 100,
+        "initial_loss": 4.528809547424316,
+        "final_loss": 2.0842294692993164
+      },
+      "replay_correctness": {
+        "passed": true
+      },
+      "timing": {
+        "median_ms": 0.08346160054206847,
+        "p10_ms": 0.08329600095748901,
+        "p90_ms": 0.08363040089607239,
+        "samples": 30,
+        "steps_per_replay": 20,
+        "raw_ms": [
+          0.08350880146026611,
+          0.08347520232200623,
+          0.08334239721298217,
+          0.08347039818763732,
+          0.08345119953155518,
+          0.0832207977771759,
+          0.08329600095748901,
+          0.0833728015422821,
+          0.08350880146026611,
+          0.08350080251693726,
+          0.08346080183982849,
+          0.08344640135765076,
+          0.08376960158348083,
+          0.08363040089607239,
+          0.08375679850578308,
+          0.08342559933662415,
+          0.08342559933662415,
+          0.08320800065994263,
+          0.08356000185012817,
+          0.08340160250663757,
+          0.0833791971206665,
+          0.08346239924430847,
+          0.0834879994392395,
+          0.08352640271186829,
+          0.08344159722328186,
+          0.08368480205535889,
+          0.0834559977054596,
+          0.0834559977054596,
+          0.08348320126533508,
+          0.08347679972648621
+        ]
+      },
+      "status": "ok"
+    }
+  ],
+  "best_index": 1
+}

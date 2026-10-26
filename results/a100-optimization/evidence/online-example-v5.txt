@@ -1,0 +1,2 @@
+100 stateful updates match eager. Final loss: 1.186284
+Each replay runs one generated CUDA training kernel.

@@ -1,0 +1,88 @@
+{
+  "purpose": "exploratory tuning, not held-out evidence",
+  "case": "tiny-online",
+  "shape": [
+    4,
+    32,
+    64,
+    16
+  ],
+  "seed": 20261025,
+  "source_sha256": {
+    "megakernel/__init__.py": "1f146bdcaefd3d8e5d5d112f2aceff0bf250659b8450a414d2f5040c695c725e",
+    "megakernel/codegen.py": "ae85c0f8eb7daf8f3566aa9a30c78a8ef853bcf1cb9bf11a8689d0396d962c02",
+    "megakernel/frontend.py": "1a972f1c5590169372f0e75ba44a0c530891d7b2a87f8f4db2a708265f4fcd0c",
+    "megakernel/gemv.py": "4f8ebaff4ec98f7b07f511a3fd7283f1962bfc01278b5409021e9411a8a09f77",
+    "megakernel/ir.py": "28d665f3ec59707c13c84c44eb85f4ea5de5c5b7520d2b79edb8c5a97afce526",
+    "megakernel/reference.py": "f2a653caae8f631fd56829fac01673fd5dc0132d6ba67774b1a014cf21bc6b73",
+    "megakernel/runtime.py": "41c96452f26b704156edd12269317b1ed638054e7e584e008133588d0fb12483",
+    "megakernel/wmma.py": "4d58c59f838c50111cff50bfec1711917bef8cf9a6a4b154b269ccb3e8bf3d16"
+  },
+  "trials": [
+    {
+      "index": 2,
+      "compiler_options": {
+        "max_blocks": 1,
+        "threads_per_block": 512
+      },
+      "compile_seconds": 49.20804292499088,
+      "resources": {
+        "registers_per_thread": 40,
+        "local_bytes_per_thread": 0,
+        "shared_bytes_per_block": 512,
+        "resident_blocks_per_sm": 3
+      },
+      "cuda_sha256": "5ccaae63cf9c396f2c16540373b479380c633dc09dadbc05de2eeabe604b42d8",
+      "trajectory": {
+        "passed": true,
+        "steps": 100,
+        "initial_loss": 2.7264771461486816,
+        "final_loss": 1.125457763671875
+      },
+      "replay_correctness": {
+        "passed": true
+      },
+      "timing": {
+        "median_ms": 0.015581600368022919,
+        "p10_ms": 0.015566399693489075,
+        "p90_ms": 0.01560479998588562,
+        "samples": 30,
+        "steps_per_replay": 20,
+        "raw_ms": [
+          0.01568319946527481,
+          0.015619200468063355,
+          0.015596799552440643,
+          0.015587200224399567,
+          0.015566399693489075,
+          0.015595200657844543,
+          0.01558080017566681,
+          0.015583999454975128,
+          0.015595200657844543,
+          0.015591999888420105,
+          0.015625600516796113,
+          0.01560479998588562,
+          0.015572799742221833,
+          0.015596799552440643,
+          0.015588800609111785,
+          0.015568000078201295,
+          0.01557600051164627,
+          0.015582400560379028,
+          0.015572799742221833,
+          0.015588800609111785,
+          0.015574400126934052,
+          0.01557600051164627,
+          0.015572799742221833,
+          0.015556800365447997,
+          0.01557600051164627,
+          0.01557600051164627,
+          0.015596799552440643,
+          0.01555359959602356,
+          0.01557919979095459,
+          0.015566399693489075
+        ]
+      },
+      "status": "ok"
+    }
+  ],
+  "best_index": 2
+}

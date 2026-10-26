@@ -1,0 +1,90 @@
+{
+  "config": {
+    "batch": 4,
+    "input": 32,
+    "hidden": 64,
+    "output": 16,
+    "warmup": 3,
+    "maxblocks": 1,
+    "threads_per_block": 512,
+    "split_k_gemv": false,
+    "blocks_per_sm": 1,
+    "gemm_k_tile": 32,
+    "gemm_tile_n": 32,
+    "shared_skew": 0,
+    "cuda_path": "results/optimization/profile-tiny-v5.cu",
+    "json": "results/optimization/profile-tiny-v5.json",
+    "seed": 101
+  },
+  "status": "ok",
+  "compile_seconds": 1.2024444059934467,
+  "megakernel": {
+    "kernel_count": 1,
+    "graph_launch_count": 0,
+    "kernels": [
+      {
+        "name": "megakernel_entry(Arguments, float*)",
+        "duration_us": 14.848000000000866
+      }
+    ],
+    "graph_launches": []
+  },
+  "loss": 4.317404747009277,
+  "megakernel_source_sha256": "8d0c118d9b829cfce0205dc0670d20300bddcceb8ba4d3088fbe3aa96b32dcb8",
+  "cuda_source_sha256": "8d0c118d9b829cfce0205dc0670d20300bddcceb8ba4d3088fbe3aa96b32dcb8",
+  "inductor_stateful": {
+    "kernel_count": 12,
+    "graph_launch_count": 0,
+    "kernels": [
+      {
+        "name": "triton_poi_fused__to_copy_0",
+        "duration_us": 2.270999999999958
+      },
+      {
+        "name": "triton_tem_fused__to_copy_add_mm_relu_1",
+        "duration_us": 2.688999999999851
+      },
+      {
+        "name": "triton_poi_fused__to_copy_2",
+        "duration_us": 2.7210000000000036
+      },
+      {
+        "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_nn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_nn_align8::Params)",
+        "duration_us": 3.6159999999999854
+      },
+      {
+        "name": "triton_per_fused__to_copy_add_div_mean_mul_pow_sub_3",
+        "duration_us": 2.1440000000000055
+      },
+      {
+        "name": "triton_tem_fused_mm_threshold_backward_4",
+        "duration_us": 2.3680000000001655
+      },
+      {
+        "name": "triton_tem_fused_mm_5",
+        "duration_us": 2.240000000000009
+      },
+      {
+        "name": "triton_poi_fused__to_copy_mul_sub_6",
+        "duration_us": 2.2719999999999345
+      },
+      {
+        "name": "triton_poi_fused__to_copy_mul_sub_7",
+        "duration_us": 2.0160000000000764
+      },
+      {
+        "name": "triton_tem_fused_mm_8",
+        "duration_us": 2.2080000000000837
+      },
+      {
+        "name": "triton_poi_fused__to_copy_mul_sub_9",
+        "duration_us": 2.431999999999789
+      },
+      {
+        "name": "triton_poi_fused__to_copy_mul_sub_10",
+        "duration_us": 1.9519999999997708
+      }
+    ],
+    "graph_launches": []
+  }
+}

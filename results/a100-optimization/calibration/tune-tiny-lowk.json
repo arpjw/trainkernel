@@ -1,0 +1,135 @@
+{
+  "shape": [
+    4,
+    32,
+    64,
+    16
+  ],
+  "purpose": "exploratory tuning",
+  "trials": [
+    {
+      "max_blocks": 1,
+      "compile_seconds": 45.02106420096243,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.029207199811935425,
+        "p10_ms": 0.029183998703956604,
+        "p90_ms": 0.029233598709106447,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    },
+    {
+      "max_blocks": 4,
+      "compile_seconds": 44.348696221015416,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.02932159900665283,
+        "p10_ms": 0.029291200637817382,
+        "p90_ms": 0.029436799883842468,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    },
+    {
+      "max_blocks": 16,
+      "compile_seconds": 44.66088118898915,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.027690400183200837,
+        "p10_ms": 0.02762719988822937,
+        "p90_ms": 0.027819201350212097,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    },
+    {
+      "max_blocks": 108,
+      "compile_seconds": 45.48371057701297,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.02767120003700256,
+        "p10_ms": 0.027608001232147218,
+        "p90_ms": 0.027744001150131224,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "purpose": "exploratory tuning, not held-out evidence",
+  "case": "tiny-online",
+  "shape": [
+    4,
+    32,
+    64,
+    16
+  ],
+  "seed": 20261025,
+  "source_sha256": {
+    "megakernel/__init__.py": "1f146bdcaefd3d8e5d5d112f2aceff0bf250659b8450a414d2f5040c695c725e",
+    "megakernel/codegen.py": "1e453913fd820b91c3f883628dc3535e4bf1b0e11d6f84ea74532827df4eb68f",
+    "megakernel/frontend.py": "7cb9ef85aacbff64209de3dac967f426bade07f9962c8b0734a948c92540ab97",
+    "megakernel/gemv.py": "4f8ebaff4ec98f7b07f511a3fd7283f1962bfc01278b5409021e9411a8a09f77",
+    "megakernel/ir.py": "28d665f3ec59707c13c84c44eb85f4ea5de5c5b7520d2b79edb8c5a97afce526",
+    "megakernel/passes.py": "ee0f8bc21835b9ec26ca70865d7e027a1e92ce3a07fc9a46aa19cf09513ab8fc",
+    "megakernel/reference.py": "f2a653caae8f631fd56829fac01673fd5dc0132d6ba67774b1a014cf21bc6b73",
+    "megakernel/runtime.py": "ffe3493e762f19977b6ce3a7c84b9cdf3a132762420aeeffe82c042a34ea606a",
+    "megakernel/wmma.py": "4d58c59f838c50111cff50bfec1711917bef8cf9a6a4b154b269ccb3e8bf3d16"
+  },
+  "trials": [
+    {
+      "index": 2,
+      "compiler_options": {
+        "max_blocks": 1,
+        "threads_per_block": 512
+      },
+      "compile_seconds": 1.2156356789637357,
+      "resources": {
+        "registers_per_thread": 40,
+        "local_bytes_per_thread": 0,
+        "shared_bytes_per_block": 512,
+        "resident_blocks_per_sm": 3
+      },
+      "cuda_sha256": "8d0c118d9b829cfce0205dc0670d20300bddcceb8ba4d3088fbe3aa96b32dcb8",
+      "trajectory": {
+        "passed": true,
+        "steps": 100,
+        "initial_loss": 2.7264771461486816,
+        "final_loss": 1.125457763671875
+      },
+      "replay_correctness": {
+        "passed": true
+      },
+      "timing": {
+        "median_ms": 0.01533920019865036,
+        "p10_ms": 0.01531360000371933,
+        "p90_ms": 0.015382400155067444,
+        "samples": 30,
+        "steps_per_replay": 20,
+        "raw_ms": [
+          0.015423999726772308,
+          0.015376000106334687,
+          0.015363200008869171,
+          0.015347200632095336,
+          0.015324799716472626,
+          0.015382400155067444,
+          0.015321600437164306,
+          0.015371200442314149,
+          0.015334400534629821,
+          0.015331199765205384,
+          0.015334400534629821,
+          0.015353600680828094,
+          0.015348799526691437,
+          0.01533920019865036,
+          0.01531360000371933,
+          0.015411199629306793,
+          0.015326400101184846,
+          0.01533920019865036,
+          0.015324799716472626,
+          0.015355199575424194,
+          0.015328000485897064,
+          0.015328000485897064,
+          0.015337599813938141,
+          0.015374399721622467,
+          0.01533920019865036,
+          0.01558080017566681,
+          0.01530880033969879,
+          0.015318399667739869,
+          0.015380799770355225,
+          0.015305599570274353
+        ]
+      },
+      "status": "ok"
+    }
+  ],
+  "best_index": 2
+}

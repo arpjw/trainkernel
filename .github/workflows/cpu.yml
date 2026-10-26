@@ -3,11 +3,17 @@ on: [push, pull_request]
 jobs:
   compiler:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        torch: ["2.8.0", "latest"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - if: matrix.torch == 'latest'
+        run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - if: matrix.torch != 'latest'
+        run: python -m pip install torch==${{ matrix.torch }} --index-url https://download.pytorch.org/whl/cpu
       - run: python -m pip install -e '.[dev]'
       - run: python -m pytest -q

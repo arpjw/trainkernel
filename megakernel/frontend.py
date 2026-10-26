@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import torch
@@ -13,6 +14,20 @@ from .ir import Operation, Program, TensorSpec
 _DTYPES = {torch.float32: "float32", torch.float16: "float16", torch.bfloat16: "bfloat16"}
 _VIEWS = {"aten.alias.default", "aten.detach.default", "aten.t.default", "aten.transpose.int", "aten.permute.default", "aten.view.default", "aten._unsafe_view.default", "aten.reshape.default", "aten.expand.default", "aten.squeeze.default", "aten.squeeze.dim", "aten.unsqueeze.default"}
 _BINARY = {"add", "sub", "mul", "div", "pow"}
+
+
+@dataclass
+class CapturedProgram:
+    """A graph bound to fixed input buffers. Outputs are reused on each replay."""
+
+    graph: Any
+    inputs: tuple[Any, ...]
+    outputs: Any
+    input_tensors: tuple[torch.Tensor, ...]
+
+    def replay(self) -> Any:
+        self.graph.replay()
+        return self.outputs
 
 
 def _metadata(node: torch.fx.Node) -> tuple[tuple[int, ...], str]:
@@ -182,6 +197,10 @@ def capture(fn: Callable[..., Any], example_inputs: Sequence[Any]) -> tuple[Prog
 def compile(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> Callable[..., Any]:
     """Compile a static pure function; explicit training graphs return gradients."""
     program, output_spec = capture(fn, example_inputs)
+    return _compile_captured(program, output_spec, example_inputs, options)
+
+
+def _compile_captured(program: Program, output_spec: TreeSpec, example_inputs: Sequence[Any], options: dict[str, Any]) -> Callable[..., Any]:
     _, input_spec = tree_flatten(tuple(example_inputs))
     from .runtime import compile_program
     runner = compile_program(program, example_inputs, **options)
@@ -195,4 +214,65 @@ def compile(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: An
     wrapped.program = program
     wrapped.runner = runner
     wrapped.source = runner.source
+    def capture_graph(*args: Any, warmup: int = 3) -> CapturedProgram:
+        if type(warmup) is not int or warmup < 1:
+            raise ValueError("megakernel: graph warmup must be positive")
+        flat, actual_spec = tree_flatten(args)
+        if actual_spec != input_spec:
+            raise ValueError("megakernel: runtime input pytree differs from the compiled signature")
+        runner._validate_inputs(tuple(flat))
+        with torch.cuda.device(runner.device):
+            saved = {i: flat[i].clone() for i in runner.inplace_outputs.values()}
+            try:
+                for _ in range(warmup):
+                    wrapped(*args)
+                torch.cuda.synchronize(runner.device)
+            finally:
+                for i, original in saved.items():
+                    flat[i].copy_(original)
+            torch.cuda.synchronize(runner.device)
+            graph = torch.cuda.CUDAGraph()
+            try:
+                with torch.cuda.graph(graph):
+                    outputs = wrapped(*args)
+            finally:
+                for i, original in saved.items():
+                    flat[i].copy_(original)
+                torch.cuda.synchronize(runner.device)
+        # Keep immutable leaf references even if callers later edit a dict/list.
+        return CapturedProgram(graph, args, outputs, tuple(flat))
+    wrapped.capture = capture_graph
     return wrapped
+
+
+def compile_training(fn: Callable[..., Any], example_inputs: Sequence[Any], **options: Any) -> Callable[..., Any]:
+    """Compile `(state, *data) -> (scalar_loss, gradients, updated_state)`.
+
+    State and gradient pytrees must match. Updated state is committed in place
+    only after the compiler proves that each original input has had its last
+    read; other updates use a staged final commit. State must
+    be detached from autograd; the function contains its own differentiation.
+    """
+    if "inplace_outputs" in options:
+        raise ValueError("megakernel: compile_training derives its own state mapping")
+    program, output_spec = capture(fn, example_inputs)
+    _, input_spec = tree_flatten(tuple(example_inputs))
+    # PyTorch 2.11 introduced accessors while 2.8 exposes children_specs.
+    def children(spec: TreeSpec) -> Sequence[TreeSpec]:
+        accessor = getattr(spec, "children", None)
+        return accessor() if callable(accessor) else spec.children_specs
+    state_spec = children(input_spec)[0]
+    output_children = children(output_spec)
+    if output_spec.type not in (tuple, list) or len(output_children) != 3:
+        raise ValueError("megakernel: training function must return loss, gradients, updated state")
+    loss_spec, gradient_spec, update_spec = output_children
+    if not loss_spec.is_leaf() or gradient_spec != state_spec or update_spec != state_spec:
+        raise ValueError("megakernel: gradients and updated state must match the state pytree")
+    n = state_spec.num_leaves
+    if not n or program.outputs[0].shape:
+        raise ValueError("megakernel: training requires nonempty state and a scalar loss")
+    for gradient, parameter in zip(program.outputs[1:1+n], program.inputs[:n]):
+        if gradient.shape != parameter.shape or gradient.dtype != parameter.dtype:
+            raise ValueError("megakernel: gradients must match parameter shapes and dtypes")
+    options["inplace_outputs"] = {1 + n + i: i for i in range(n)}
+    return _compile_captured(program, output_spec, example_inputs, options)

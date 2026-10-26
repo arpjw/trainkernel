@@ -1,0 +1,89 @@
+{
+  "purpose": "exploratory tuning, not held-out evidence",
+  "case": "medium",
+  "shape": [
+    128,
+    512,
+    1024,
+    256
+  ],
+  "seed": 20261025,
+  "source_sha256": {
+    "megakernel/__init__.py": "1f146bdcaefd3d8e5d5d112f2aceff0bf250659b8450a414d2f5040c695c725e",
+    "megakernel/codegen.py": "df20bf95e53a794f5e552a3fce1f3f8b266f53e55c20066329a695758dfd0e93",
+    "megakernel/frontend.py": "1a972f1c5590169372f0e75ba44a0c530891d7b2a87f8f4db2a708265f4fcd0c",
+    "megakernel/gemv.py": "4f8ebaff4ec98f7b07f511a3fd7283f1962bfc01278b5409021e9411a8a09f77",
+    "megakernel/ir.py": "35403a99efaffa40cdb275d0f8b1817ed1d8aa62dca3d7af307c3f0e4071de1b",
+    "megakernel/reference.py": "f2a653caae8f631fd56829fac01673fd5dc0132d6ba67774b1a014cf21bc6b73",
+    "megakernel/runtime.py": "41c96452f26b704156edd12269317b1ed638054e7e584e008133588d0fb12483",
+    "megakernel/wmma.py": "4d58c59f838c50111cff50bfec1711917bef8cf9a6a4b154b269ccb3e8bf3d16"
+  },
+  "trials": [
+    {
+      "index": 4,
+      "compiler_options": {
+        "max_blocks": 216,
+        "blocks_per_sm": 2,
+        "shared_skew": 16
+      },
+      "compile_seconds": 45.44504812901141,
+      "resources": {
+        "registers_per_thread": 48,
+        "local_bytes_per_thread": 0,
+        "shared_bytes_per_block": 11776,
+        "resident_blocks_per_sm": 10
+      },
+      "cuda_sha256": "e2128f0cd83af28b24e7ac03c3bdf86ecd6b056ff46a645ae9c288666e6837b1",
+      "trajectory": {
+        "passed": true,
+        "steps": 100,
+        "initial_loss": 3.56203556060791,
+        "final_loss": 1.7643260955810547
+      },
+      "replay_correctness": {
+        "passed": true
+      },
+      "timing": {
+        "median_ms": 0.26652719974517824,
+        "p10_ms": 0.2662064075469971,
+        "p90_ms": 0.326311993598938,
+        "samples": 30,
+        "steps_per_replay": 20,
+        "raw_ms": [
+          0.32665119171142576,
+          0.326311993598938,
+          0.32623839378356934,
+          0.3264944076538086,
+          0.32625761032104494,
+          0.32665441036224363,
+          0.32625598907470704,
+          0.3262351989746094,
+          0.3030783891677856,
+          0.2662064075469971,
+          0.26646718978881834,
+          0.26642398834228515,
+          0.26616320610046384,
+          0.2662895917892456,
+          0.2662224054336548,
+          0.2665424108505249,
+          0.2664367914199829,
+          0.2666640043258667,
+          0.26652801036834717,
+          0.265993595123291,
+          0.2665247917175293,
+          0.2665071964263916,
+          0.26627840995788576,
+          0.2664959907531738,
+          0.2665071964263916,
+          0.26651840209960936,
+          0.2669615983963013,
+          0.26652638912200927,
+          0.2665488004684448,
+          0.2670511960983276
+        ]
+      },
+      "status": "ok"
+    }
+  ],
+  "best_index": 4
+}

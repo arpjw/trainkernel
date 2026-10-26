@@ -1,0 +1,42 @@
+{
+  "config": {
+    "batch": 1,
+    "batches": 4,
+    "blocks_per_sm": 1,
+    "gemm_k_tile": 32,
+    "gemm_tile_n": 32,
+    "hidden": 128,
+    "input": 128,
+    "json": "results/optimization/compare-online-v4.json",
+    "max_blocks": 1,
+    "no_inline_input_casts": false,
+    "output": 16,
+    "samples": 30,
+    "seed": 20261025,
+    "shared_skew": 0,
+    "split_k_gemv": true,
+    "steps": 20,
+    "threads_per_block": 1024,
+    "trajectory_steps": 100,
+    "warmup": 10
+  },
+  "error": "InductorError: SubprocException: An exception occurred in a subprocess:\n\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/compile_worker/subproc_pool.py\", line 340, in do_job\n    result = job()\n             ^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/compile_tasks.py\", line 62, in _worker_compile_triton\n    kernel.precompile(warm_cache_only=True)\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/triton_heuristics.py\", line 399, in precompile\n    self._precompile_worker()\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/triton_heuristics.py\", line 430, in _precompile_worker\n    compile_results.append(self._precompile_config(c))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/triton_heuristics.py\", line 713, in _precompile_config\n    binary = triton.compile(*compile_args, **compile_kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 359, in compile\n    next_module = compile_ir(module, metadata)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/backends/nvidia/compiler.py\", line 456, in <lambda>\n    stages[\"ttgir\"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/backends/nvidia/compiler.py\", line 298, in make_ttgir\n    pm.run(mod)\nRuntimeError: PassManager::run failed\n\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\n",
+  "numerical_policy": "FP32 master weights; BF16 compute casts; all losses, gradients, and updates checked",
+  "numerical_tolerances": {
+    "gradients_bf16_compute": {
+      "atol": 0.004,
+      "rtol": 0.04
+    },
+    "loss_fp32": {
+      "atol": 2e-05,
+      "rtol": 0.0002
+    },
+    "updates_fp32": {
+      "atol": 2e-05,
+      "rtol": 0.0002
+    }
+  },
+  "optimizer": "sgd",
+  "status": "error",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/megakernel/benchmarks/train_loop.py\", line 235, in main\n    graphable(params, *batches[0]); torch.cuda.synchronize()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py\", line 749, in compile_wrapper\n    raise e.remove_dynamo_frames() from None  # see TORCHDYNAMO_VERBOSE=1\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/compile_fx.py\", line 923, in _compile_fx_inner\n    raise InductorError(e, currentframe()).with_traceback(\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/compile_fx.py\", line 907, in _compile_fx_inner\n    mb_compiled_graph = fx_codegen_and_compile(\n                        ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/compile_fx.py\", line 1578, in fx_codegen_and_compile\n    return scheme.codegen_and_compile(gm, example_inputs, inputs_to_check, graph_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/compile_fx.py\", line 1456, in codegen_and_compile\n    compiled_module = graph.compile_to_module()\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/graph.py\", line 2293, in compile_to_module\n    return self._compile_to_module()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/graph.py\", line 2303, in _compile_to_module\n    mod = self._compile_to_module_lines(wrapper_code)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/graph.py\", line 2371, in _compile_to_module_lines\n    mod = PyCodeCache.load_by_key_path(\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/codecache.py\", line 3296, in load_by_key_path\n    mod = _reload_python_module(key, path, set_sys_modules=in_toplevel)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/compile_tasks.py\", line 31, in _reload_python_module\n    exec(code, mod.__dict__, mod.__dict__)\n  File \"/tmp/torchinductor_root/4e/c4edd422lvmdnfm6ztqnrxrpbksjmeqrd4vlrye23es7j2xpgvlp.py\", line 572, in <module>\n    async_compile.wait(globals())\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/async_compile.py\", line 491, in wait\n    self._wait_futures(scope)\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/async_compile.py\", line 511, in _wait_futures\n    kernel = result.result()\n             ^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/codecache.py\", line 4014, in result\n    return self.result_fn()\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/async_compile.py\", line 370, in get_result\n    kernel, elapsed_us = task.result()\n                         ^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/concurrent/futures/_base.py\", line 456, in result\n    return self.__get_result()\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/concurrent/futures/_base.py\", line 401, in __get_result\n    raise self._exception\ntorch._inductor.exc.InductorError: SubprocException: An exception occurred in a subprocess:\n\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/compile_worker/subproc_pool.py\", line 340, in do_job\n    result = job()\n             ^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/compile_tasks.py\", line 62, in _worker_compile_triton\n    kernel.precompile(warm_cache_only=True)\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/triton_heuristics.py\", line 399, in precompile\n    self._precompile_worker()\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/triton_heuristics.py\", line 430, in _precompile_worker\n    compile_results.append(self._precompile_config(c))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/torch/_inductor/runtime/triton_heuristics.py\", line 713, in _precompile_config\n    binary = triton.compile(*compile_args, **compile_kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 359, in compile\n    next_module = compile_ir(module, metadata)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/backends/nvidia/compiler.py\", line 456, in <lambda>\n    stages[\"ttgir\"] = lambda src, metadata: self.make_ttgir(src, metadata, options, capability)\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/backends/nvidia/compiler.py\", line 298, in make_ttgir\n    pm.run(mod)\nRuntimeError: PassManager::run failed\n\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\n\n"
+}

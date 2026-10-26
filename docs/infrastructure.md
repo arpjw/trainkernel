@@ -1,6 +1,6 @@
 # GPU infrastructure
 
-## Current access (2026-10-25)
+## Initial validation pod (2026-10-25)
 
 - GitHub private repository: `https://github.com/arpjw/megakernel`.
 - RunPod access uses the official OAuth MCP integration at `https://mcp.runpod.io/`; no API key is stored in this project.
@@ -15,4 +15,12 @@ The pod had no network volume and only exposed SSH. After compiler validation, o
 
 ## Verification
 
-Direct SSH checks passed on the active pod: `nvidia-smi` reported the A100, `nvcc --version` reported CUDA 12.8.93, and PyTorch reported CUDA available with a successful CUDA tensor operation. Full provisioning and validation evidence is in `work/runpod-pod.jsonl`.
+Direct SSH checks passed on the pod: `nvidia-smi` reported the A100, `nvcc --version` reported CUDA 12.8.93, and PyTorch reported CUDA available with a successful CUDA tensor operation. The [initial A100 report](../results/a100/README.md) contains the compiler validation from that pod.
+
+## Optimization pod (2026-10-26)
+
+- Project-created pod `i49aq9zez15ek9` ran one A100 SXM4 80 GB in Secure Cloud US-MD-1. The quoted running rate was `$1.79/hour`. The image was `runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`, with a 50 GB ephemeral disk and no network volume.
+- Access used a dedicated temporary SSH key outside this repository and Runpod OAuth tools. No Runpod API key was used or stored. Existing account keys and unrelated resources were not changed.
+- The [optimization report](../results/a100-optimization/README.md) retains the twelve-run held-out matrix, 113-test A100 log, sanitizer results, generated CUDA, profiler record, and environment details. Results were copied to the repository workspace before teardown.
+- Clock locking and hardware counters were denied by the pod's permissions, as recorded in the [clock attempt](../results/a100-optimization/evidence/clock-policy.json) and [counter attempt](../results/a100-optimization/evidence/ncu-tiny.csv). Timings therefore used unlocked clocks.
+- After evidence was saved, only this project-created pod was terminated. Runpod returned HTTP 204 for deletion, and a follow-up get returned HTTP 404. The dedicated temporary SSH key was removed locally.

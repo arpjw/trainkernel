@@ -1,0 +1,104 @@
+{
+  "shape": [
+    4,
+    32,
+    64,
+    16
+  ],
+  "purpose": "exploratory tuning",
+  "trials": [
+    {
+      "max_blocks": 1,
+      "compile_seconds": 47.15562202199362,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.021527200192213058,
+        "p10_ms": 0.02149440050125122,
+        "p90_ms": 0.021558399498462676,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    },
+    {
+      "max_blocks": 4,
+      "compile_seconds": 44.11796244699508,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.025946399569511412,
+        "p10_ms": 0.025910401344299318,
+        "p90_ms": 0.025995200872421263,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    },
+    {
+      "max_blocks": 16,
+      "compile_seconds": 43.918265532993246,
+      "correctness": {
+        "passed": true,
+        "max_absolute_error_per_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerances": {
+          "rtol": 0.04,
+          "atol": 0.004
+        },
+        "failures": []
+      },
+      "timing": {
+        "median_ms": 0.02417600005865097,
+        "p10_ms": 0.024079999327659606,
+        "p90_ms": 0.02430880069732666,
+        "samples": 30,
+        "steps_per_sample": 20
+      },
+      "status": "ok"
+    }
+  ]
+}

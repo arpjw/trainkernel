@@ -1,0 +1,121 @@
+{
+  "shape": [
+    128,
+    512,
+    1024,
+    256
+  ],
+  "max_blocks": 108,
+  "instrumented": true,
+  "stages": [
+    {
+      "operations": [
+        [
+          "mm",
+          "mm"
+        ]
+      ],
+      "median_us": 95.2
+    },
+    {
+      "operations": [
+        [
+          "relu",
+          "relu"
+        ]
+      ],
+      "median_us": 4.768
+    },
+    {
+      "operations": [
+        [
+          "mm_1",
+          "mm"
+        ]
+      ],
+      "median_us": 117.28
+    },
+    {
+      "operations": [
+        [
+          "sub",
+          "sub"
+        ]
+      ],
+      "median_us": 2.624
+    },
+    {
+      "operations": [
+        [
+          "mean",
+          "mean"
+        ],
+        [
+          "mul_1",
+          "mul"
+        ]
+      ],
+      "median_us": 68.384
+    },
+    {
+      "operations": [
+        [
+          "sum_1",
+          "sum"
+        ],
+        [
+          "mm_2",
+          "mm"
+        ],
+        [
+          "mm_3",
+          "mm"
+        ]
+      ],
+      "median_us": 117.6
+    },
+    {
+      "operations": [
+        [
+          "threshold_backward",
+          "threshold_backward"
+        ]
+      ],
+      "median_us": 6.896
+    },
+    {
+      "operations": [
+        [
+          "sum_2",
+          "sum"
+        ],
+        [
+          "mm_4",
+          "mm"
+        ]
+      ],
+      "median_us": 71.056
+    },
+    {
+      "operations": [
+        [
+          "sub_1",
+          "sub"
+        ],
+        [
+          "sub_2",
+          "sub"
+        ],
+        [
+          "sub_3",
+          "sub"
+        ],
+        [
+          "sub_4",
+          "sub"
+        ]
+      ],
+      "median_us": 21.6
+    }
+  ]
+}

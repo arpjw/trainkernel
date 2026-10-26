@@ -1,0 +1,10 @@
+{
+  "command": [
+    "nvidia-smi",
+    "-lgc",
+    "1410,1410"
+  ],
+  "returncode": 4,
+  "stdout": "The current user does not have permission to change clocks for GPU 00000000:87:00.0.\nTerminating early due to previous errors.\n",
+  "stderr": ""
+}

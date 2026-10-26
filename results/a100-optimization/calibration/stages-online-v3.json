@@ -1,0 +1,133 @@
+{
+  "shape": [
+    1,
+    128,
+    128,
+    16
+  ],
+  "options": {
+    "max_blocks": 1,
+    "threads_per_block": 1024,
+    "blocks_per_sm": 1,
+    "gemm_k_tile": 32,
+    "gemm_tile_n": 32,
+    "shared_skew": 0,
+    "split_k_gemv": true,
+    "inplace_outputs": {
+      "5": 0,
+      "6": 1,
+      "7": 2,
+      "8": 3
+    }
+  },
+  "instrumented": true,
+  "resources": {
+    "registers_per_thread": 44,
+    "local_bytes_per_thread": 0,
+    "shared_bytes_per_block": 4608,
+    "resident_blocks_per_sm": 1
+  },
+  "stages": [
+    {
+      "operations": [
+        [
+          "mm_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 5.504
+    },
+    {
+      "operations": [
+        [
+          "mm_1",
+          "mm"
+        ]
+      ],
+      "median_us": 2.272
+    },
+    {
+      "operations": [
+        [
+          "sub",
+          "sub"
+        ]
+      ],
+      "median_us": 0.448
+    },
+    {
+      "operations": [
+        [
+          "mean",
+          "mean"
+        ],
+        [
+          "_to_copy_6",
+          "cast"
+        ]
+      ],
+      "median_us": 1.152
+    },
+    {
+      "operations": [
+        [
+          "sum_1",
+          "sum"
+        ],
+        [
+          "mm_2",
+          "mm"
+        ]
+      ],
+      "median_us": 0.832
+    },
+    {
+      "operations": [
+        [
+          "mm_3_epilogue",
+          "mm"
+        ]
+      ],
+      "median_us": 1.504
+    },
+    {
+      "operations": [
+        [
+          "sum_2",
+          "sum"
+        ],
+        [
+          "mm_4",
+          "mm"
+        ],
+        [
+          "_to_copy_7",
+          "cast"
+        ]
+      ],
+      "median_us": 5.184
+    },
+    {
+      "operations": [
+        [
+          "_to_copy_9",
+          "cast"
+        ],
+        [
+          "sub_1",
+          "sub"
+        ]
+      ],
+      "median_us": 4.512
+    },
+    {
+      "operations": [
+        [
+          "output_commit",
+          "copy"
+        ]
+      ],
+      "median_us": 1.792
+    }
+  ]
+}

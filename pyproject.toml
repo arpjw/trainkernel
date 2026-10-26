@@ -3,14 +3,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "megakernel"
-version = "0.1.0"
+version = "0.2.0"
 requires-python = ">=3.10"
-dependencies = ["torch>=2.6"]
+dependencies = ["torch>=2.8", "ninja>=1.11"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ninja>=1.11"]
+dev = ["pytest>=8"]
 
 [tool.setuptools.packages.find]
 include = ["megakernel*"]
