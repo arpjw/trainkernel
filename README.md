@@ -4,7 +4,7 @@ Experimental compiler that turns a static, functional PyTorch training step into
 
 The current backend schedules operators in topological order, uses grid barriers for dependencies, inlines single-consumer pointwise operations, and reuses temporary storage after its last reader. BF16 and FP16 matrix multiplications use WMMA tensor cores. FP32 uses a tiled SIMT implementation for accuracy.
 
-This is an initial compiler research prototype. Performance results belong in `results/` and are not implied by reducing launch count.
+This is an initial compiler research prototype. [A100 validation and measurements](results/a100/README.md) include 41 passing tests and four training shapes. Optimized Inductor CUDA Graphs remain faster overall; reducing launch count has not established a meaningful speed advantage.
 
 ## Install
 

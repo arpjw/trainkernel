@@ -1,0 +1,26 @@
+{
+  "source_sha256": "c09a821da7d07a9a8dc2c457039f04ef35362a493ddb992b2ad51cfc8a9433c4",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "gpu_events": [
+    {
+      "name": "megakernel_entry(Arguments, float*)",
+      "duration_us": 77.18299999999999
+    }
+  ],
+  "megakernel_launches": 1,
+  "loss": 3.28125,
+  "inductor_cuda_graph_launches": 1,
+  "inductor_gpu_events": [
+    "void at::native::(anonymous namespace)::multi_tensor_apply_kernel<at::native::(anonymous namespace)::TensorListMetadata<2>, at::native::(anonymous namespace)::UnaryOpFunctor<c10::BFloat16, 2, 1, 1>, at::native::Copy<c10::BFloat16, c10::BFloat16> >(at::native::(anonymous namespace)::TensorListMetadata<2>, at::native::(anonymous namespace)::UnaryOpFunctor<c10::BFloat16, 2, 1, 1>, at::native::Copy<c10::BFloat16, c10::BFloat16>)",
+    "triton_tem_fused_add_mm_relu_0",
+    "triton_tem_fused_mm_1",
+    "triton_red_fused_add_div_mean_mul_pow_sub_2",
+    "triton_per_fused_mul_sub_sum_3",
+    "triton_tem_fused_mm_threshold_backward_4",
+    "triton_per_fused_mul_sub_sum_5",
+    "triton_tem_fused_mm_mul_sub_6",
+    "triton_tem_fused_mm_mul_sub_7"
+  ],
+  "inductor_loss": 3.28125
+}

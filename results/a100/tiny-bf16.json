@@ -1,0 +1,193 @@
+{
+  "capability": [
+    8,
+    0
+  ],
+  "config": {
+    "batch": 4,
+    "blocks_per_sm": 1,
+    "dtype": "bfloat16",
+    "dump_cuda": null,
+    "hidden": 64,
+    "inner": 10,
+    "input": 32,
+    "json": "results/a100/tiny-bf16.json",
+    "output": 16,
+    "repeats": 20,
+    "skip_inductor": false,
+    "steps": 5,
+    "warmup": 10
+  },
+  "correctness": {
+    "failures": [],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "passed": true,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "cuda_runtime": "12.8",
+  "device": "NVIDIA A100-SXM4-80GB",
+  "inductor_compile_seconds": 2.1257298620184883,
+  "inductor_correctness": {
+    "failures": [],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.0009765625,
+      0.0009765625,
+      0.00390625,
+      0.0009765625,
+      9.5367431640625e-07,
+      0.0,
+      0.0001220703125,
+      0.0
+    ],
+    "passed": true,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "inductor_cuda_graphs_requested": true,
+  "inductor_eager_rounding_correctness": {
+    "failures": [],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "passed": true,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "inductor_eager_rounding_options": {
+    "coordinate_descent_tuning": true,
+    "emulate_precision_casts": true,
+    "max_autotune": true
+  },
+  "inductor_graph_correctness": {
+    "failures": [],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.0009765625,
+      0.0009765625,
+      0.00390625,
+      0.0009765625,
+      9.5367431640625e-07,
+      0.0,
+      0.0001220703125,
+      0.0
+    ],
+    "passed": true,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "kernel": {
+    "blocks_per_sm_limit": 1,
+    "direct_outputs": 9,
+    "grid_barriers": 9,
+    "inlined_operations": 11,
+    "launches_per_step": 1,
+    "materialized_operations": 16,
+    "max_work_blocks": 16,
+    "tensor_core_operations": 5,
+    "workspace_bytes": 28672
+  },
+  "megakernel_compile_seconds": 48.40847753203707,
+  "status": "ok",
+  "timings": {
+    "eager": {
+      "median_ms": 1.0188655853271484,
+      "p10_ms": 1.0074975967407227,
+      "p90_ms": 1.04901123046875,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "eager_cuda_graph": {
+      "median_ms": 0.0507343977689743,
+      "p10_ms": 0.05065600275993347,
+      "p90_ms": 0.05076799988746643,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "inductor_cuda_graph": {
+      "median_ms": 0.017137599736452104,
+      "p10_ms": 0.01709119975566864,
+      "p90_ms": 0.017203199863433837,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "inductor_eager_rounding_cuda_graph": {
+      "median_ms": 0.016798400133848188,
+      "p10_ms": 0.016735999286174773,
+      "p90_ms": 0.016835199296474458,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "inductor_max_autotune": {
+      "median_ms": 0.09842559993267058,
+      "p10_ms": 0.09776319861412049,
+      "p90_ms": 0.09999039769172668,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "megakernel": {
+      "median_ms": 1.0153792381286622,
+      "p10_ms": 0.9389311790466308,
+      "p90_ms": 1.3344672203063965,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "megakernel_cuda_graph": {
+      "median_ms": 0.028937599062919615,
+      "p10_ms": 0.028787198662757873,
+      "p90_ms": 0.0290336012840271,
+      "samples": 20,
+      "steps_per_sample": 10
+    }
+  },
+  "torch": "2.8.0+cu128",
+  "trajectory": [
+    {
+      "compiled": 3.03125,
+      "eager": 3.03125
+    },
+    {
+      "compiled": 3.0,
+      "eager": 3.0
+    },
+    {
+      "compiled": 2.984375,
+      "eager": 2.984375
+    },
+    {
+      "compiled": 2.953125,
+      "eager": 2.953125
+    },
+    {
+      "compiled": 2.9375,
+      "eager": 2.9375
+    }
+  ]
+}

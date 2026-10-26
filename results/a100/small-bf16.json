@@ -1,0 +1,203 @@
+{
+  "capability": [
+    8,
+    0
+  ],
+  "config": {
+    "batch": 32,
+    "blocks_per_sm": 1,
+    "dtype": "bfloat16",
+    "dump_cuda": null,
+    "hidden": 256,
+    "inner": 10,
+    "input": 128,
+    "json": "results/a100/small-bf16.json",
+    "output": 64,
+    "repeats": 20,
+    "skip_inductor": false,
+    "steps": 5,
+    "warmup": 10
+  },
+  "correctness": {
+    "failures": [],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "passed": true,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "cuda_runtime": "12.8",
+  "device": "NVIDIA A100-SXM4-80GB",
+  "inductor_compile_seconds": 1.5849935110309161,
+  "inductor_correctness": {
+    "failures": [
+      {
+        "error": "Tensor-likes are not close!\n\nMismatched elements: 14 / 32768 (0.0%)\nGreatest absolute difference: 0.006927490234375 at index (71, 222) (up to 0.004 allowed)\nGreatest relative difference: 114.5 at index (117, 222) (up to 0.04 allowed)",
+        "output": 1
+      }
+    ],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.006931304931640625,
+      0.002471923828125,
+      0.0009765625,
+      0.00048828125,
+      1.52587890625e-05,
+      0.0,
+      6.103515625e-05,
+      0.0
+    ],
+    "passed": false,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "inductor_cuda_graphs_requested": true,
+  "inductor_eager_rounding_correctness": {
+    "failures": [],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "passed": true,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "inductor_eager_rounding_options": {
+    "coordinate_descent_tuning": true,
+    "emulate_precision_casts": true,
+    "max_autotune": true
+  },
+  "inductor_graph_correctness": {
+    "failures": [
+      {
+        "error": "Tensor-likes are not close!\n\nMismatched elements: 14 / 32768 (0.0%)\nGreatest absolute difference: 0.006927490234375 at index (71, 222) (up to 0.004 allowed)\nGreatest relative difference: 114.5 at index (117, 222) (up to 0.04 allowed)",
+        "output": 1
+      }
+    ],
+    "max_absolute_error_per_output": [
+      0.0,
+      0.006931304931640625,
+      0.002471923828125,
+      0.0009765625,
+      0.00048828125,
+      1.52587890625e-05,
+      0.0,
+      6.103515625e-05,
+      0.0
+    ],
+    "passed": false,
+    "tolerances": {
+      "atol": 0.004,
+      "rtol": 0.04
+    }
+  },
+  "kernel": {
+    "blocks_per_sm_limit": 1,
+    "direct_outputs": 9,
+    "grid_barriers": 9,
+    "inlined_operations": 11,
+    "launches_per_step": 1,
+    "materialized_operations": 16,
+    "max_work_blocks": 256,
+    "tensor_core_operations": 5,
+    "workspace_bytes": 524288
+  },
+  "megakernel_compile_seconds": 49.27919908397598,
+  "status": "ok",
+  "timings": {
+    "eager": {
+      "median_ms": 0.917630386352539,
+      "p10_ms": 0.9082624435424804,
+      "p90_ms": 0.9359040260314941,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "eager_cuda_graph": {
+      "median_ms": 0.06434399783611297,
+      "p10_ms": 0.06417279839515685,
+      "p90_ms": 0.06441919803619385,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "inductor_cuda_graph": {
+      "median_ms": 0.01884320005774498,
+      "p10_ms": 0.01875839978456497,
+      "p90_ms": 0.01892160028219223,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "inductor_eager_rounding_cuda_graph": {
+      "median_ms": 0.018569600582122803,
+      "p10_ms": 0.018512000143527985,
+      "p90_ms": 0.018662400543689728,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "inductor_max_autotune": {
+      "median_ms": 0.09730079770088196,
+      "p10_ms": 0.09617919921875,
+      "p90_ms": 0.09962559938430786,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "megakernel": {
+      "median_ms": 1.1993936061859132,
+      "p10_ms": 1.0644351959228515,
+      "p90_ms": 2.6286272048950194,
+      "samples": 20,
+      "steps_per_sample": 10
+    },
+    "megakernel_cuda_graph": {
+      "median_ms": 0.07123520076274872,
+      "p10_ms": 0.0698303997516632,
+      "p90_ms": 0.0716159999370575,
+      "samples": 20,
+      "steps_per_sample": 10
+    }
+  },
+  "torch": "2.8.0+cu128",
+  "trajectory": [
+    {
+      "compiled": 3.28125,
+      "eager": 3.28125
+    },
+    {
+      "compiled": 3.265625,
+      "eager": 3.265625
+    },
+    {
+      "compiled": 3.265625,
+      "eager": 3.265625
+    },
+    {
+      "compiled": 3.25,
+      "eager": 3.25
+    },
+    {
+      "compiled": 3.234375,
+      "eager": 3.234375
+    }
+  ]
+}

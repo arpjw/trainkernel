@@ -1,0 +1,55 @@
+{
+  "recorded_at_utc": "2026-10-26T05:35:53.958646+00:00",
+  "source_commit": "e03036a4f7966f322c40675be64d0aa3f7cadd4b",
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+  "torch": "2.8.0+cu128",
+  "torch_cuda": "12.8",
+  "gpu": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "compute_capability": [
+      8,
+      0
+    ],
+    "memory_bytes": 85094825984,
+    "multiprocessors": 108
+  },
+  "driver": "595.91.07",
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Fri_Feb_21_20:23:50_PST_2025\nCuda compilation tools, release 12.8, V12.8.93\nBuild cuda_12.8.r12.8/compiler.35583870_0",
+  "provider": {
+    "name": "Runpod",
+    "pod_id": "vbx2h07susuqdi",
+    "region": "US-MD-1",
+    "cloud": "SECURE",
+    "quoted_gpu_usd_per_hour": 1.79,
+    "image": "runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404",
+    "authentication": "OAuth MCP; SSH data plane",
+    "network_volume": false,
+    "cleanup_verified": true,
+    "teardown_verified_at_utc": "2026-10-26T05:38:33.485Z"
+  },
+  "measurement": {
+    "dtype": "bfloat16",
+    "parameters_gradients_loss_updates": "bfloat16",
+    "tf32": false,
+    "fp16_reduced_precision_reduction": false,
+    "bf16_reduced_precision_reduction": false,
+    "warmup": 10,
+    "samples": 20,
+    "steps_per_sample": 10,
+    "trajectory_steps": 5,
+    "timing": "CUDA events; fixed inputs; compilation excluded",
+    "clocks_locked": false
+  },
+  "source_files_sha256": {
+    "megakernel/codegen.py": "ac48c3df9e516dd84bdb4d79e2a7c78da4d6badf7b624f7953d51291c8f45d36",
+    "megakernel/frontend.py": "7f916577d33e82a176f09084abcff841405e154d04634433798f4da665b78f7c",
+    "megakernel/runtime.py": "cefe1ed62f93fb710199fe9563e7adea2970c0bc0d135c4042d0ac8e91aef080",
+    "megakernel/ir.py": "35403a99efaffa40cdb275d0f8b1817ed1d8aa62dca3d7af307c3f0e4071de1b",
+    "benchmarks/train_mlp.py": "4935f5a03c240841ee4526c3d24fb5df862e4602a23f9cd3f2a4cff9af4dced9",
+    "tests/test_gpu.py": "3627b855648fbe462d3ea983763987afee23d2b295ae99372e93d90a20f871e3",
+    "tests/test_frontend.py": "ed8c99c2a983da01390acda968ad799792372fa7cb7a71494c7eb9862921579a",
+    "tests/test_codegen.py": "af30fdae2eb0e7802d11b9e2a73874ed4aad2dca737fd8d021f067ef4bf9daae",
+    "tests/test_ir_reference.py": "68b892ddb06d157637d94a5a0075555f438735844fba77febb9e851cf695f17e"
+  }
+}
