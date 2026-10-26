@@ -224,6 +224,7 @@ def main(argv=None):
     config = {key: (str(value) if isinstance(value, Path) else value) for key, value in vars(args).items()}
     result = {"status": "pending", "config": config, "optimizer": "sgd",
               "task": args.task,
+              "objective": ("mean squared error on one-hot teacher labels" if args.task == "classification-head" else "mean squared error on teacher outputs"),
               "numerical_policy": "FP32 master weights; BF16 compute casts; all losses, gradients, and updates checked",
               "numerical_tolerances": {"loss_fp32": {"rtol": 0.0002, "atol": 0.00002}, "gradients_bf16_compute": {"rtol": 0.04, "atol": 0.004}, "updates_fp32": {"rtol": 0.0002, "atol": 0.00002}}}
     if not torch.cuda.is_available():

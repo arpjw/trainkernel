@@ -40,3 +40,6 @@ dev = ["build>=1.2", "pytest>=8", "twine>=5"]
 
 [tool.setuptools.packages.find]
 include = ["trainkernel*"]
+
+[tool.setuptools.package-data]
+trainkernel = ["py.typed"]

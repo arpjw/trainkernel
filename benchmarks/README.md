@@ -20,9 +20,10 @@ The predeclared workload set is: `tiny-online` (B4/I32/H64/O16), `online`
 (B128/I512/H1024/O256). Results should be collected for every workload rather
 than selecting only the fastest case.
 
-The same harness can model an online personalization or classification head by
-using one-hot teacher targets. This keeps the compiler contract unchanged while
-making the target semantics explicit:
+The same harness can model an online personalization or least-squares
+classification head by using one-hot teacher targets with mean squared error.
+This keeps the compiler contract unchanged while making the target semantics
+explicit. It does not claim to implement cross-entropy training:
 
 ```bash
 python -m benchmarks.train_loop --task classification-head \

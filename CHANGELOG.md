@@ -14,4 +14,5 @@ versioning while its public API is experimental.
   training trajectories.
 - Publishes held-out A100 comparisons against eager PyTorch and Inductor,
   including workloads where TrainKernel is slower.
-- Includes a classification-head workload and compilation break-even reporting.
+- Includes a one-hot least-squares classification-head workload and end-to-end
+  setup break-even reporting.
