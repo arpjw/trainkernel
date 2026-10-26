@@ -24,7 +24,7 @@ print("capability:", torch.cuda.get_device_capability())
 print("device_count:", torch.cuda.device_count())
 print("git:", subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip())
 PY
-nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader >> "$out_dir/environment.txt"
+nvidia-smi --query-gpu=name,uuid,driver_version,memory.total --format=csv,noheader >> "$out_dir/environment.txt"
 nvcc_bin=${NVCC:-${CUDA_HOME:-/usr/local/cuda}/bin/nvcc}
 "$nvcc_bin" --version >> "$out_dir/environment.txt"
 
@@ -33,6 +33,7 @@ python -m examples.online_training | tee "$out_dir/online-training.txt"
 
 # The four-shape matrix and seed policy are shared with the A100 held-out run.
 bash scripts/run_train_loop_suite.sh "$out_dir/heldout" | tee "$out_dir/heldout-suite.txt"
+python -m scripts.summarize_h100 "$out_dir/heldout" | tee "$out_dir/heldout-h100-summary.txt"
 
 for seed in 101 211 307; do
   python -m benchmarks.train_loop \

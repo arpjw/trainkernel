@@ -85,6 +85,11 @@ def main(argv: list[str] | None = None) -> int:
     if capability != (9, 0):
         parser.error(f"expected H100 compute capability 9.0, found {capability}")
     properties = torch.cuda.get_device_properties(torch.cuda.current_device())
+    if properties.multi_processor_count != 132:
+        parser.error(
+            "this fixed candidate set requires an H100 SXM with 132 SMs; "
+            f"found {properties.name} with {properties.multi_processor_count} SMs"
+        )
     hardware = {
         "name": properties.name,
         "capability": list(capability),
